@@ -33,16 +33,16 @@ public class FieldUtil {
     }
 
     /**
-     * 从{@param clazz}中获取带有 {@param annotationCls} 注解的字段
+     * 从{@param clazz}中获取带有 {@param annotationClazz} 注解的字段
      * @param clazz 获取field 的字段
-     * @param annotationCls 注解类
+     * @param annotationClazz 注解类
      * @return List<Field>
      */
-    public static List<Field> getFieldsListWithAnnotation(final Class<?> clazz, final Class<? extends Annotation> annotationCls) {
+    public static List<Field> getFieldsListWithAnnotation(final Class<?> clazz, final Class<? extends Annotation> annotationClazz) {
         final List<Field> allFields =getAllFields(clazz);
         final List<Field> annotatedFields = new ArrayList<>();
         for (final Field field : allFields) {
-            if (field.getAnnotation(annotationCls) != null) {
+            if (field.getAnnotation(annotationClazz) != null) {
                 annotatedFields.add(field);
             }
         }
