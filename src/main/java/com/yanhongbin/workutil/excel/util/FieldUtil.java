@@ -1,0 +1,54 @@
+package com.yanhongbin.workutil.excel.util;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Created with IDEA
+ * description: Fields工具类,反射中Field相关操作
+ *
+ * @author :YanHongBin
+ * @date :Created in 2019/12/11 16:07
+ */
+public class FieldUtil {
+
+    /**
+     * 获取Class里的所有字段,包括父类字段
+     *
+     * @param clazz Class对象
+     * @return Field[]
+     */
+    public static List<Field> getAllFields(Class<?> clazz) {
+        ArrayList<Field> allFields = new ArrayList<Field>();
+        Class<?> currentClass = clazz;
+        while (currentClass != null) {
+            final Field[] declaredFields = currentClass.getDeclaredFields();
+            Collections.addAll(allFields, declaredFields);
+            currentClass = currentClass.getSuperclass();
+        }
+        return allFields;
+    }
+
+    /**
+     * 从{@param clazz}中获取带有 {@param annotationCls} 注解的字段
+     * @param clazz 获取field 的字段
+     * @param annotationCls 注解类
+     * @return List<Field>
+     */
+    public static List<Field> getFieldsListWithAnnotation(final Class<?> clazz, final Class<? extends Annotation> annotationCls) {
+        final List<Field> allFields =getAllFields(clazz);
+        final List<Field> annotatedFields = new ArrayList<>();
+        for (final Field field : allFields) {
+            if (field.getAnnotation(annotationCls) != null) {
+                annotatedFields.add(field);
+            }
+        }
+        return annotatedFields;
+    }
+
+
+
+}
