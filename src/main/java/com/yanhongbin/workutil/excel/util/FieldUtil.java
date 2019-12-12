@@ -34,7 +34,7 @@ public class FieldUtil {
 
     /**
      * 从{@param clazz}中获取带有 {@param annotationClazz} 注解的字段
-     * @param clazz 获取field 的字段
+     * @param clazz 获取field 的类
      * @param annotationClazz 注解类
      * @return List<Field>
      */
@@ -48,7 +48,5 @@ public class FieldUtil {
         }
         return annotatedFields;
     }
-
-
 
 }
