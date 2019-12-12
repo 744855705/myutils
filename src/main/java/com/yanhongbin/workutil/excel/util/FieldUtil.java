@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * Created with IDEA
- * description: Fields¹¤¾ßÀà,·´ÉäÖĞFieldÏà¹Ø²Ù×÷
+ * description: Fieldså·¥å…·ç±»,åå°„ä¸­Fieldç›¸å…³æ“ä½œ
  *
  * @author :YanHongBin
  * @date :Created in 2019/12/11 16:07
@@ -16,13 +16,13 @@ import java.util.List;
 public class FieldUtil {
 
     /**
-     * »ñÈ¡ClassÀïµÄËùÓĞ×Ö¶Î,°üÀ¨¸¸Àà×Ö¶Î
+     * è·å–Classé‡Œçš„æ‰€æœ‰å­—æ®µ,åŒ…æ‹¬çˆ¶ç±»å­—æ®µ
      *
-     * @param clazz Class¶ÔÏó
+     * @param clazz Classå¯¹è±¡
      * @return Field[]
      */
     public static List<Field> getAllFields(Class<?> clazz) {
-        ArrayList<Field> allFields = new ArrayList<Field>();
+        ArrayList<Field> allFields = new ArrayList<>();
         Class<?> currentClass = clazz;
         while (currentClass != null) {
             final Field[] declaredFields = currentClass.getDeclaredFields();
@@ -33,9 +33,9 @@ public class FieldUtil {
     }
 
     /**
-     * ´Ó{@param clazz}ÖĞ»ñÈ¡´øÓĞ {@param annotationClazz} ×¢½âµÄ×Ö¶Î
-     * @param clazz »ñÈ¡field µÄÀà
-     * @param annotationClazz ×¢½âÀà
+     * ä»{@param clazz}ä¸­è·å–å¸¦æœ‰ {@param annotationClazz} æ³¨è§£çš„å­—æ®µ
+     * @param clazz è·å–field çš„ç±»
+     * @param annotationClazz æ³¨è§£ç±»
      * @return List<Field>
      */
     public static List<Field> getFieldsListWithAnnotation(final Class<?> clazz, final Class<? extends Annotation> annotationClazz) {

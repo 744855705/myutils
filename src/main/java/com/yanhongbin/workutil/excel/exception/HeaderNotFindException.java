@@ -2,7 +2,7 @@ package com.yanhongbin.workutil.excel.exception;
 
 /**
  * Created with IDEA
- * description: 传入的表头参数不能与实体类标志的参数一一对应时抛出的异常
+ * description: 浼犲叆鐨勮〃澶村弬鏁颁笉鑳戒笌瀹炰綋绫绘爣蹇楃殑鍙傛暟涓�涓�瀵瑰簲鏃舵姏鍑虹殑寮傚父
  *
  * @author :YanHongBin
  * @date :Created in 2019/12/11 15:57
