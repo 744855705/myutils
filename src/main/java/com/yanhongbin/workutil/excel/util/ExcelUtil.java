@@ -1,6 +1,7 @@
 package com.yanhongbin.workutil.excel.util;
 
 import com.yanhongbin.workutil.excel.annonation.Excel;
+import com.yanhongbin.workutil.excel.exception.AnnotationNotFoundException;
 import com.yanhongbin.workutil.excel.exception.HeaderNotFindException;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.hssf.usermodel.HSSFRichTextString;
@@ -21,7 +22,7 @@ import java.util.*;
  * description: excel工具类
  *              配合{@link Excel}注解使用
  *              基于org.apache.poi version 4.1.1
- *
+ *              JDK8
  * @author :YanHongBin
  * @version 1.0
  * @date :Created in 2019/12/4 13:53
@@ -48,7 +49,7 @@ public class ExcelUtil {
     }
 
     /**
-     * 将对象列表转换为文件
+     * 将对象列表转换为文件,写入response输出流
      *
      * @param clazz 类型
      * @param queue 实体list
@@ -243,7 +244,6 @@ public class ExcelUtil {
         // 获取所有字段,包括父类中的字段,并且字段被@Excel注解修饰
         List<Field> fields = FieldUtil.getFieldsListWithAnnotation(clazz,Excel.class);
         List<Field> fieldList = new ArrayList<>(fields.size());
-        boolean all = false;
         if (properties == null || properties.length == 0) {
             // 默认拿出所有被Excel修饰的字段
             fields.forEach((field) -> {
@@ -448,4 +448,21 @@ public class ExcelUtil {
         return createExampleWorkbook(clazz, new String[0]);
     }
 
+
+    /**
+     * 获取改类所有被{@link Excel}注解修饰的字段的{@link Excel#value()}
+     * @param clazz 要查询的Class对象
+     * @return
+     * @throws AnnotationNotFoundException
+     */
+    public static String[] getAllProperties(Class<?> clazz) throws AnnotationNotFoundException {
+        List<Field> fieldsListWithAnnotation = FieldUtil.getFieldsListWithAnnotation(clazz, Excel.class);
+        if (fieldsListWithAnnotation.size() == 0) {
+            throw new AnnotationNotFoundException(clazz,Excel.class);
+        }
+        final String[] properties = new String[fieldsListWithAnnotation.size()];
+        final int[] index = {0};
+        fieldsListWithAnnotation.forEach(field -> properties[index[0]++] = field.getAnnotation(Excel.class).value());
+        return properties;
+    }
 }

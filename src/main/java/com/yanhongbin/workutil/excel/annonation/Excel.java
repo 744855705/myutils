@@ -6,7 +6,7 @@ import java.lang.annotation.*;
 
 /**
  * Created with IDEA
- * description: excel 导入导出 标识字段
+ * description: excel 导入导出 标识字段 (导出需要该类有无参构造函数)
  * @author :YanHongBin
  * @date :Created in2019/12/4 13:21
  */
