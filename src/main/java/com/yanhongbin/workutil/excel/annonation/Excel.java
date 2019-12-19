@@ -10,9 +10,10 @@ import java.lang.annotation.*;
  * @author :YanHongBin
  * @date :Created in2019/12/4 13:21
  */
-@Target(ElementType.FIELD)
+@Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Inherited
 public @interface Excel {
 
     /**

@@ -1,7 +1,9 @@
 package com.yanhongbin.workutil.excel.util;
 
 import com.yanhongbin.workutil.excel.annonation.Excel;
+import com.yanhongbin.workutil.excel.annonation.ExcelDictionary;
 import com.yanhongbin.workutil.excel.exception.AnnotationNotFoundException;
+import com.yanhongbin.workutil.excel.exception.ExcelDictionaryMatchException;
 import com.yanhongbin.workutil.excel.exception.HeaderNotFindException;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.hssf.usermodel.HSSFRichTextString;
@@ -162,7 +164,7 @@ public class ExcelUtil {
                     Cell cell = row.getCell(index[0]++);
                     // 将获取到的字段值转换为对应的类型并放入实体中
                     field.set(t, field.getType().cast(getCellValue(cell, field)));
-                } catch (IllegalAccessException e) {
+                } catch (IllegalAccessException | ExcelDictionaryMatchException e) {
                     e.printStackTrace();
                 }
             });
@@ -177,14 +179,19 @@ public class ExcelUtil {
      * @param field 表头字段
      * @return value(Object)
      */
-    private static Object getCellValue(Cell cell, Field field) {
-        Excel excel = field.getAnnotation(Excel.class);
+    private static Object getCellValue(Cell cell, Field field) throws ExcelDictionaryMatchException {
         Class<?> fieldType = field.getType();
-        com.yanhongbin.workutil.excel.enumerate.CellType type = excel.type();
+        // 获取Cell类型(支持字典自动设置为String)
+        com.yanhongbin.workutil.excel.enumerate.CellType type = processExcelDictionaryCelltype(field);
         Object value;
         switch (type) {
             case STRING:
-                value = cell.getStringCellValue();
+                // 对字典类型进行特殊处理
+                value = processExcelDictionaryValue(cell.getStringCellValue(),field);
+                if (fieldType.equals(Integer.class)) {
+                    // 字段为int型
+                    value = Integer.parseInt(String.valueOf(value));
+                }
                 break;
             case NUMERIC:
                 // 数字取出会转换为Double类型,需进行处理
@@ -221,6 +228,24 @@ public class ExcelUtil {
         return value;
     }
 
+    private static Object processExcelDictionaryValue(Object value, Field field) throws ExcelDictionaryMatchException {
+        ExcelDictionary excelDictionary = field.getAnnotation(ExcelDictionary.class);
+        if (excelDictionary != null) {
+            String[] valueArray = excelDictionary.valueArray();
+            int index = 0;
+            for (String val : valueArray) {
+                if (val.equals(value)) {
+                    String[] keyArray = excelDictionary.keyArray();
+                    return keyArray[index];
+                }
+                index++;
+            }
+            throw new ExcelDictionaryMatchException("字典匹配失败,请检查键值 " + value + " 是否存在于valueArray中");
+        }else{
+            return value;
+        }
+
+    }
     /**
      * 将传入的MultipartFile 类型的excel文件转换为poi的Workbook
      *
@@ -370,9 +395,8 @@ public class ExcelUtil {
      * @throws Exception
      */
     private static void setCellValueByType(Field field, Cell cell, Object object) throws Exception {
-        Excel excel = field.getAnnotation(Excel.class);
-        CellType type = excel.type();
-        Object value = field.get(object);
+        CellType type = processExcelDictionaryCelltype(field);
+        Object value = processExcelDictionaryKey(field, object);
         switch (type) {
             case STRING:
                 cell.setCellType(org.apache.poi.ss.usermodel.CellType.STRING);
@@ -404,6 +428,49 @@ public class ExcelUtil {
                 cell.setCellType(org.apache.poi.ss.usermodel.CellType.STRING);
                 cell.setCellValue(String.valueOf(value));
         }
+    }
+
+    /**
+     * 对字典类型进行特殊处理,单元格类型设置为文本
+     * @param field 字段
+     * @param
+     * @return
+     */
+    private static CellType processExcelDictionaryCelltype(Field field) {
+        ExcelDictionary excelDictionary = field.getAnnotation(ExcelDictionary.class);
+        if (excelDictionary != null) {
+            return CellType.STRING;
+        } else {
+            return field.getAnnotation(Excel.class).type();
+        }
+    }
+
+    /**
+     * 导出时处理字典类型
+     *
+     * @param field
+     * @param obj
+     * @return
+     */
+    public static Object processExcelDictionaryKey(Field field, Object obj) throws IllegalAccessException, ExcelDictionaryMatchException {
+        ExcelDictionary excelDictionary = field.getAnnotation(ExcelDictionary.class);
+        if (excelDictionary != null) {
+            // 该字段对应字典
+            String[] keyArray = excelDictionary.keyArray();
+            // 导出时将字典类型与keyArray匹配
+            int index = 0;
+            for (String key : keyArray) {
+                if (key.equals(String.valueOf(field.get(obj)))) {
+                    String[] valueArray = excelDictionary.valueArray();
+                    return valueArray[index];
+                }
+                index++;
+            }
+            // 字典匹配失败,抛出异常
+            throw new ExcelDictionaryMatchException("字典匹配失败,请检查键值 " + field.get(obj) + " 是否存在于keyArray中");
+        }
+        // 不是字典类型,直接返回value
+        return field.get(obj);
     }
 
     /**
@@ -450,7 +517,7 @@ public class ExcelUtil {
 
 
     /**
-     * 获取改类所有被{@link Excel}注解修饰的字段的{@link Excel#value()}
+     * 获取该类所有被{@link Excel}注解修饰的字段的{@link Excel#value()}
      * @param clazz 要查询的Class对象
      * @return
      * @throws AnnotationNotFoundException
