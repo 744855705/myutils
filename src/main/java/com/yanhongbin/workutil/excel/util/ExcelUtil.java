@@ -189,7 +189,7 @@ public class ExcelUtil {
                 // 对字典类型进行特殊处理
                 value = processExcelDictionaryValue(cell.getStringCellValue(),field);
                 if (fieldType.equals(Integer.class)) {
-                    // 字段为int型
+                    // 字典字段为int型
                     value = Integer.parseInt(String.valueOf(value));
                 }
                 break;
@@ -228,6 +228,13 @@ public class ExcelUtil {
         return value;
     }
 
+    /**
+     * 判断是否是字典类型,是则匹配字典,返回字典对应值,不是则直接返回字段值
+     * @param value 字段对应值
+     * @param field 字段本身
+     * @return value
+     * @throws ExcelDictionaryMatchException 标识为字典字段,但是字典值匹配失败,抛出异常
+     */
     private static Object processExcelDictionaryValue(Object value, Field field) throws ExcelDictionaryMatchException {
         ExcelDictionary excelDictionary = field.getAnnotation(ExcelDictionary.class);
         if (excelDictionary != null) {
@@ -445,12 +452,15 @@ public class ExcelUtil {
         }
     }
 
+
     /**
-     * 导出时处理字典类型
+     * 导出时处理字典类型,如果字段是字典类型,返回匹配后的值,不是则直接返回value
      *
-     * @param field
-     * @param obj
-     * @return
+     * @param field 字段
+     * @param obj 要导出的实体
+     * @return value
+     * @throws IllegalAccessException Field::get方法抛出的异常
+     * @throws ExcelDictionaryMatchException 标识为字典字段,但是字典值匹配失败,抛出此异常
      */
     public static Object processExcelDictionaryKey(Field field, Object obj) throws IllegalAccessException, ExcelDictionaryMatchException {
         ExcelDictionary excelDictionary = field.getAnnotation(ExcelDictionary.class);
