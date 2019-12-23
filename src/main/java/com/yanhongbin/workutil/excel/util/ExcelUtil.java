@@ -1,10 +1,13 @@
 package com.yanhongbin.workutil.excel.util;
 
-import com.yanhongbin.workutil.excel.annonation.Excel;
-import com.yanhongbin.workutil.excel.annonation.ExcelDictionary;
+import com.yanhongbin.workutil.excel.annotation.Excel;
+import com.yanhongbin.workutil.excel.annotation.ExcelDictionary;
+import com.yanhongbin.workutil.excel.annotation.FileName;
 import com.yanhongbin.workutil.excel.exception.AnnotationNotFoundException;
 import com.yanhongbin.workutil.excel.exception.ExcelDictionaryMatchException;
 import com.yanhongbin.workutil.excel.exception.HeaderNotFindException;
+import com.yanhongbin.workutil.web.util.RequestUtil;
+import com.yanhongbin.workutil.web.util.ResponseUtil;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -15,7 +18,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.*;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 
@@ -35,6 +41,10 @@ public class ExcelUtil {
 
     private static Integer SHEET_SIZE = 65536;
 
+    private static String FIREFOX = "Firefox";
+    private static String CHROME = "Chrome";
+    private static String SAFARI = "Safari";
+    private static String PATTERN = "yyyy年MM月dd日 HH时mm分";
     /**
      * 将导入的Excel文件进行处理,转化为对象的List
      *
@@ -58,9 +68,55 @@ public class ExcelUtil {
      * @param <T>   声明的类型
      * @see ExcelUtil#createWorkbook(Queue, Class)
      */
-    public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue, HttpServletResponse response) throws HeaderNotFindException,IOException {
+    public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
         createWorkbook(queue, clazz)
-                .write(response.getOutputStream());
+                .write(getOutPutStream(clazz));
+    }
+
+    /**
+     * 设置输出流
+     * @param clazz 获取文件名需要class
+     * @return
+     * @throws IOException
+     * @throws AnnotationNotFoundException
+     */
+    private static OutputStream getOutPutStream(Class<?> clazz) throws IOException, AnnotationNotFoundException {
+        String fileName = getFileName(clazz);
+        HttpServletRequest request = RequestUtil.getRequest();
+        HttpServletResponse response = ResponseUtil.getResponse();
+        final String userAgent = request.getHeader("user-agent");
+        if (userAgent != null && userAgent.indexOf(FIREFOX) >= 0
+                || userAgent.indexOf(CHROME) >= 0 || userAgent.indexOf(SAFARI) >= 0) {
+            fileName = new String(fileName.getBytes(), "ISO8859-1");
+        } else {
+            fileName = URLEncoder.encode(fileName, "UTF8"); // 其他浏览器
+        }
+        response.reset();
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/vnd.ms-excel;charset=UTF-8");
+        response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
+        response.addHeader("Pargam", "no-cache");
+        response.addHeader("Cache-Control", "no-cache");
+        response.setDateHeader("Expires", 0);
+        response.flushBuffer();
+        return response.getOutputStream();
+    }
+
+
+    /**
+     * 生成文件名
+     * @param clazz Class
+     * @return
+     */
+    private static String getFileName(Class<?> clazz) throws AnnotationNotFoundException {
+        FileName fileNameAnnotation = clazz.getAnnotation(FileName.class);
+        if (fileNameAnnotation == null) {
+            throw new AnnotationNotFoundException(clazz,FileName.class);
+        }
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(PATTERN);
+        String format = simpleDateFormat.format(new Date());
+        System.out.println(format);
+        return fileNameAnnotation.value()+ format +".xls";
     }
 
     /**
@@ -103,7 +159,7 @@ public class ExcelUtil {
      * @return List<T>
      * @throws Exception
      */
-    private static <T> List<T> buildEntityList(Class<T> clazz, Workbook workbook) throws HeaderNotFindException, InstantiationException, IllegalAccessException{
+    private static <T> List<T> buildEntityList(Class<T> clazz, Workbook workbook) throws HeaderNotFindException, InstantiationException, IllegalAccessException, ExcelDictionaryMatchException {
         List<T> entityList = new ArrayList<>();
         int numberOfSheets = workbook.getNumberOfSheets();
         for (int i = 0; i < numberOfSheets; i++) {
@@ -122,7 +178,7 @@ public class ExcelUtil {
      * @param <T>   声明的类型
      * @return List<T>
      */
-    private static <T> List<T> processSheet(Sheet sheet, Class<T> clazz) throws HeaderNotFindException, InstantiationException, IllegalAccessException {
+    private static <T> List<T> processSheet(Sheet sheet, Class<T> clazz) throws HeaderNotFindException, InstantiationException, IllegalAccessException, ExcelDictionaryMatchException {
         List<T> entityList = new ArrayList<>();
         // 获取表头
         Row firstRow = sheet.getRow(0);
@@ -154,12 +210,12 @@ public class ExcelUtil {
      * @throws InstantiationException
      * @throws IllegalAccessException
      */
-    private static <T> T processRow(Row row, Class<T> clazz, List<Field> header) throws InstantiationException, IllegalAccessException {
+    private static <T> T processRow(Row row, Class<T> clazz, List<Field> header) throws InstantiationException, IllegalAccessException, ExcelDictionaryMatchException {
         T t = clazz.newInstance();
         short lastCellNum = row.getLastCellNum();
         for (int i = 0; i <= lastCellNum; i++) {
             int[] index = {0};
-            header.forEach(field -> {
+            /*header.forEach(field -> {
                 try {
                     Cell cell = row.getCell(index[0]++);
                     // 将获取到的字段值转换为对应的类型并放入实体中
@@ -167,7 +223,14 @@ public class ExcelUtil {
                 } catch (IllegalAccessException | ExcelDictionaryMatchException e) {
                     e.printStackTrace();
                 }
-            });
+            });*/
+
+            // 为了抛出异常,停止使用lambda表达式
+            for (Field field : header) {
+                Cell cell = row.getCell(index[0]++);
+                // 将获取到的字段值转换为对应的类型并放入实体中
+                field.set(t, field.getType().cast(getCellValue(cell, field)));
+            }
         }
         return t;
     }
@@ -329,7 +392,7 @@ public class ExcelUtil {
      * @param <T>        声明的类型
      * @return Workbook
      */
-    public static <T> Workbook createWorkbook(Queue<T> queue, Class<T> clazz, String[] properties) throws HeaderNotFindException{
+    private static <T> Workbook createWorkbook(Queue<T> queue, Class<T> clazz, String[] properties) throws HeaderNotFindException{
         HSSFWorkbook workbook = new HSSFWorkbook();
         // 页码数
         double sheetNo = Math.ceil(queue.size() / SHEET_SIZE) + 1;
@@ -462,16 +525,19 @@ public class ExcelUtil {
      * @throws IllegalAccessException Field::get方法抛出的异常
      * @throws ExcelDictionaryMatchException 标识为字典字段,但是字典值匹配失败,抛出此异常
      */
-    public static Object processExcelDictionaryKey(Field field, Object obj) throws IllegalAccessException, ExcelDictionaryMatchException {
+    private static Object processExcelDictionaryKey(Field field, Object obj) throws IllegalAccessException, ExcelDictionaryMatchException {
         ExcelDictionary excelDictionary = field.getAnnotation(ExcelDictionary.class);
         if (excelDictionary != null) {
             // 该字段对应字典
             String[] keyArray = excelDictionary.keyArray();
+            String[] valueArray = excelDictionary.valueArray();
+            if (keyArray.length != valueArray.length) {
+                throw new ExcelDictionaryMatchException("keyArray和valueArray长度不一致");
+            }
             // 导出时将字典类型与keyArray匹配
             int index = 0;
             for (String key : keyArray) {
                 if (key.equals(String.valueOf(field.get(obj)))) {
-                    String[] valueArray = excelDictionary.valueArray();
                     return valueArray[index];
                 }
                 index++;
@@ -507,7 +573,7 @@ public class ExcelUtil {
      * @param <T>        声明的类型
      * @return Workbook
      */
-    public static <T> Workbook createExampleWorkbook(Class<T> clazz, String[] properties) throws HeaderNotFindException {
+    private static <T> Workbook createExampleWorkbook(Class<T> clazz, String[] properties) throws HeaderNotFindException {
         HSSFWorkbook workbook = new HSSFWorkbook();
         createRowHeader(workbook.createSheet(), buildHeader(clazz, properties));
         workbook.setSheetName(0, "第1页");

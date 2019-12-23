@@ -10,6 +10,6 @@ package com.yanhongbin.workutil.excel.exception;
 public class AnnotationNotFoundException extends Exception {
 
     public AnnotationNotFoundException(Class<?> clazz,Class<?> annotationClazz) {
-        super(new StringBuilder().append("在 ").append(clazz.getName()).append(" 中不能找到注解  ").append(annotationClazz.getName()).toString());
+        super("在 " + (clazz.getName()) + " 中不能找到注解  " + (annotationClazz.getName()));
     }
 }
