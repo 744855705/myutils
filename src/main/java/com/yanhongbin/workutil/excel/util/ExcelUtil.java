@@ -39,12 +39,44 @@ public class ExcelUtil {
 
     private static Logger log =  LoggerFactory.getLogger(ExcelUtil.class);
 
+    /**
+     * 一页最大行数
+     */
     private static Integer SHEET_SIZE = 65536;
 
+    /**
+     * 火狐
+     */
     private static String FIREFOX = "Firefox";
+
+    /**
+     * 谷歌
+     */
     private static String CHROME = "Chrome";
+
+    /**
+     * apple
+     */
     private static String SAFARI = "Safari";
-    private static String PATTERN = "yyyy年MM月dd日 HH时mm分";
+
+    /**
+     * 文件名时间格式化 pattern
+     */
+    private static String FILENAME_PATTERN = "yyyy年MM月dd日 HH时mm分";
+
+    /**
+     * excel中时间格式化 pattern
+     */
+    private static String DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
+
+    public static void setDateFormatPattern(String dateFormatPattern) {
+        DATE_FORMAT_PATTERN = dateFormatPattern;
+    }
+
+    public static void setFilenamePattern(String filenamePattern) {
+        FILENAME_PATTERN = filenamePattern;
+    }
+
     /**
      * 将导入的Excel文件进行处理,转化为对象的List
      *
@@ -74,7 +106,21 @@ public class ExcelUtil {
     }
 
     /**
-     * 设置输出流
+     * 按照传入的表头将对象列表转换为文件,写入response输出流
+     *
+     * @param clazz 类型
+     * @param queue 实体list
+     * @param properties 表头
+     * @param <T>   声明的类型
+     * @see ExcelUtil#createWorkbook(Queue, Class, String[])
+     */
+    public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue, String[] properties) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
+        createWorkbook(queue, clazz, properties)
+                .write(getOutPutStream(clazz));
+    }
+
+    /**
+     * 设置输出流,加入文件名
      * @param clazz 获取文件名需要class
      * @return
      * @throws IOException
@@ -102,7 +148,6 @@ public class ExcelUtil {
         return response.getOutputStream();
     }
 
-
     /**
      * 生成文件名
      * @param clazz Class
@@ -113,7 +158,7 @@ public class ExcelUtil {
         if (fileNameAnnotation == null) {
             throw new AnnotationNotFoundException(clazz,FileName.class);
         }
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(PATTERN);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(FILENAME_PATTERN);
         String format = simpleDateFormat.format(new Date());
         System.out.println(format);
         return fileNameAnnotation.value()+ format +".xls";
@@ -122,7 +167,7 @@ public class ExcelUtil {
     /**
      * 根据表头生成导入示例文档(表头需与注解{@link Excel} value值相同)
      *
-     * @param clazz      要导入的对象类
+     * @param clazz      要导入的目标类
      * @param properties 表头对应的字段
      * @param response   HttpServletResponse
      * @param <T>        声明的泛型
@@ -350,12 +395,12 @@ public class ExcelUtil {
                 }
             });
         } else {
-            fields.forEach((field) -> {
-                Excel excel = field.getAnnotation(Excel.class);
-                if (excel != null) {
-                    // 字段被@Excel修饰并且和properties中的表头名字相等
-                    for (int i = 0; i < properties.length; i++) {
-                        if (properties[i].equals(excel.value())) {
+            // 按照传入数组顺序进行匹配
+            Arrays.asList(properties).forEach(property -> {
+                for (Field field : fields) {
+                    Excel excel = field.getAnnotation(Excel.class);
+                    if (excel != null) {
+                        if (property.equals(excel.value())) {
                             field.setAccessible(true);
                             fieldList.add(field);
                         }
@@ -451,6 +496,7 @@ public class ExcelUtil {
             try {
                 setCellValueByType(field, cell, poll);
             } catch (Exception e) {
+                // 捕获异常,在匹配失败时打印异常信息,但是仍然可以生成文档,匹配失败的单元格内容为空
                 e.printStackTrace();
             }
         });
@@ -467,8 +513,16 @@ public class ExcelUtil {
     private static void setCellValueByType(Field field, Cell cell, Object object) throws Exception {
         CellType type = processExcelDictionaryCelltype(field);
         Object value = processExcelDictionaryKey(field, object);
+        if (value == null) {
+            cell.setBlank();
+            return;
+        }
         switch (type) {
             case STRING:
+                // 处理时间类型Date
+                if (field.getType() == Date.class) {
+                    value = new SimpleDateFormat(DATE_FORMAT_PATTERN).format((Date)value);
+                }
                 cell.setCellType(org.apache.poi.ss.usermodel.CellType.STRING);
                 cell.setCellValue(String.valueOf(value));
                 break;
@@ -503,14 +557,18 @@ public class ExcelUtil {
     /**
      * 对字典类型进行特殊处理,单元格类型设置为文本
      * @param field 字段
-     * @param
-     * @return
+     * @return CellType
      */
     private static CellType processExcelDictionaryCelltype(Field field) {
         ExcelDictionary excelDictionary = field.getAnnotation(ExcelDictionary.class);
+        Class<?> type = field.getType();
+        if (type == Date.class) {
+            return CellType.STRING;
+        }
         if (excelDictionary != null) {
             return CellType.STRING;
         } else {
+
             return field.getAnnotation(Excel.class).type();
         }
     }
@@ -595,8 +653,8 @@ public class ExcelUtil {
     /**
      * 获取该类所有被{@link Excel}注解修饰的字段的{@link Excel#value()}
      * @param clazz 要查询的Class对象
-     * @return
-     * @throws AnnotationNotFoundException
+     * @return String[] properties
+     * @throws AnnotationNotFoundException 未找到{@link Excel}注解时抛出此异常
      */
     public static String[] getAllProperties(Class<?> clazz) throws AnnotationNotFoundException {
         List<Field> fieldsListWithAnnotation = FieldUtil.getFieldsListWithAnnotation(clazz, Excel.class);

@@ -19,7 +19,7 @@ public class FieldUtil {
      * 获取Class里的所有字段,包括父类字段
      *
      * @param clazz Class对象
-     * @return Field[]
+     * @return List<Field>
      */
     public static List<Field> getAllFields(Class<?> clazz) {
         ArrayList<Field> allFields = new ArrayList<>();
