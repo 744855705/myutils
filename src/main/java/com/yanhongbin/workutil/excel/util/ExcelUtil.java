@@ -479,12 +479,8 @@ public class ExcelUtil {
         // 页码数
         double sheetNo = Math.ceil(queue.size() / SHEET_SIZE) + 1;
         for (int i = 0; i < sheetNo; i++) {
-            int numberOfColumn = createSheet(queue, workbook, clazz, properties, cellStyleFactory);
+            createSheet(queue, workbook, clazz, properties, cellStyleFactory);
             workbook.setSheetName(i, "第" + (i + 1) + "页");
-            HSSFSheet sheetAt = workbook.getSheetAt(i);
-            for (int j = 0; j < numberOfColumn; j++) {
-                sheetAt.autoSizeColumn(j,true);
-            }
         }
         return workbook;
     }
@@ -498,7 +494,7 @@ public class ExcelUtil {
      * @param properties 表头字段名
      * @param <T>        声明的类型
      */
-    public static <T> int createSheet(Queue<T> queue, Workbook workbook, Class<T> clazz, String[] properties,CellStyleFactory cellStyleFactory) throws HeaderNotFindException {
+    public static <T> void createSheet(Queue<T> queue, Workbook workbook, Class<T> clazz, String[] properties,CellStyleFactory cellStyleFactory) throws HeaderNotFindException {
         final Sheet sheet = workbook.createSheet();
         List<Field> fieldList = buildHeader(clazz, properties);
         // 构建表头
@@ -517,7 +513,10 @@ public class ExcelUtil {
             Row iRow = sheet.createRow(i);
             createCell(cellStyleFactory,queue, iRow, fieldList);
         }
-        return fieldList.size();
+        int size = fieldList.size();
+        for (int i = 0; i <size ; i++) {
+            sheet.autoSizeColumn(i);
+        }
     }
 
     /**
