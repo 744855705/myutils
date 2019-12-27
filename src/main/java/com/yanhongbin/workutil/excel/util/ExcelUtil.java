@@ -12,6 +12,7 @@ import com.yanhongbin.workutil.web.util.RequestUtil;
 import com.yanhongbin.workutil.web.util.ResponseUtil;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.hssf.usermodel.HSSFRichTextString;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import com.yanhongbin.workutil.excel.enumerate.CellType;
 import org.apache.poi.ss.usermodel.*;
@@ -191,7 +192,6 @@ public class ExcelUtil {
         }
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(FILENAME_PATTERN);
         String format = simpleDateFormat.format(new Date());
-        System.out.println(format);
         return fileNameAnnotation.value()+ format +".xls";
     }
 
@@ -479,8 +479,12 @@ public class ExcelUtil {
         // 页码数
         double sheetNo = Math.ceil(queue.size() / SHEET_SIZE) + 1;
         for (int i = 0; i < sheetNo; i++) {
-            createSheet(queue, workbook, clazz, properties, cellStyleFactory);
+            int numberOfColumn = createSheet(queue, workbook, clazz, properties, cellStyleFactory);
             workbook.setSheetName(i, "第" + (i + 1) + "页");
+            HSSFSheet sheetAt = workbook.getSheetAt(i);
+            for (int j = 0; j < numberOfColumn; j++) {
+                sheetAt.autoSizeColumn(j,true);
+            }
         }
         return workbook;
     }
@@ -494,7 +498,7 @@ public class ExcelUtil {
      * @param properties 表头字段名
      * @param <T>        声明的类型
      */
-    public static <T> void createSheet(Queue<T> queue, Workbook workbook, Class<T> clazz, String[] properties,CellStyleFactory cellStyleFactory) throws HeaderNotFindException {
+    public static <T> int createSheet(Queue<T> queue, Workbook workbook, Class<T> clazz, String[] properties,CellStyleFactory cellStyleFactory) throws HeaderNotFindException {
         final Sheet sheet = workbook.createSheet();
         List<Field> fieldList = buildHeader(clazz, properties);
         // 构建表头
@@ -513,7 +517,7 @@ public class ExcelUtil {
             Row iRow = sheet.createRow(i);
             createCell(cellStyleFactory,queue, iRow, fieldList);
         }
-
+        return fieldList.size();
     }
 
     /**
@@ -524,12 +528,12 @@ public class ExcelUtil {
      * @param fieldList 导出的fieldlist
      * @param <T>       声明的类型
      */
-    private static <T> void createCell(CellStyleFactory defaultCellStyleFactory, Queue<T> queue, Row row, List<Field> fieldList) {
+    private static <T> void createCell(CellStyleFactory cellStyleFactory, Queue<T> queue, Row row, List<Field> fieldList) {
         int[] index = {0};
         T poll = queue.poll();
         fieldList.forEach(field -> {
             Cell cell = row.createCell(index[0]++);
-            cell.setCellStyle(defaultCellStyleFactory.getCellStyle());
+            cell.setCellStyle(cellStyleFactory.getCellStyle());
             // 取队列头,按照当前field指定的类型,放入单元格Cell
             try {
                 setCellValueByType(field, cell, poll);
@@ -706,4 +710,9 @@ public class ExcelUtil {
         fieldsListWithAnnotation.forEach(field -> properties[index[0]++] = field.getAnnotation(Excel.class).value());
         return properties;
     }
+    /*
+        192.168.1.58:13256/pay/order/getAllWithoutTest?startTime=2019-12-26%2017:48:30&endTime=2019-12-27%2017:48:30
+        192.168.1.58:13256/pay/order/getDeviceUseCount
+        192.168.1.58:13256/pay/order/getUserChargeCount
+     */
 }
