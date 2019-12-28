@@ -158,6 +158,7 @@ public class ExcelUtil {
      * @throws IOException
      * @throws AnnotationNotFoundException
      */
+    @SuppressWarnings("all")
     private static OutputStream getOutPutStream(Class<?> clazz) throws IOException, AnnotationNotFoundException {
         String fileName = getFileName(clazz);
         HttpServletRequest request = RequestUtil.getRequest();
@@ -185,6 +186,7 @@ public class ExcelUtil {
      * @param clazz Class
      * @return
      */
+    @SuppressWarnings("all")
     private static String getFileName(Class<?> clazz) throws AnnotationNotFoundException {
         FileName fileNameAnnotation = clazz.getAnnotation(FileName.class);
         if (fileNameAnnotation == null) {
@@ -204,6 +206,7 @@ public class ExcelUtil {
      * @param <T>        声明的泛型
      * @throws Exception
      */
+    @SuppressWarnings("all")
     public static <T> void exampleWorkbookOutPut(Class<T> clazz, HttpServletResponse response, String[] properties) throws HeaderNotFindException,IOException {
         createExampleWorkbook(clazz, properties)
                 .write(response.getOutputStream());
@@ -235,6 +238,7 @@ public class ExcelUtil {
      * @return List<T>
      * @throws Exception
      */
+    @SuppressWarnings("all")
     private static <T> List<T> buildEntityList(Class<T> clazz, Workbook workbook) throws HeaderNotFindException, InstantiationException, IllegalAccessException, ExcelDictionaryMatchException {
         List<T> entityList = new ArrayList<>();
         int numberOfSheets = workbook.getNumberOfSheets();
@@ -286,6 +290,7 @@ public class ExcelUtil {
      * @throws InstantiationException
      * @throws IllegalAccessException
      */
+    @SuppressWarnings("all")
     private static <T> T processRow(Row row, Class<T> clazz, List<Field> header) throws InstantiationException, IllegalAccessException, ExcelDictionaryMatchException {
         T t = clazz.newInstance();
         short lastCellNum = row.getLastCellNum();
@@ -397,7 +402,6 @@ public class ExcelUtil {
      *
      * @param file 传入的MultipartFile 类型的excel文件
      * @return Workbook
-     * @throws Exception
      */
     private static Workbook createWorkbookFile(MultipartFile file) throws IOException, EncryptedDocumentException {
         return WorkbookFactory.create(file.getInputStream());
@@ -455,6 +459,7 @@ public class ExcelUtil {
      * @param <T>   声明的类型
      * @return Workbook
      */
+    @SuppressWarnings("all")
     public static <T> Workbook createWorkbook(Queue<T> queue, Class<T> clazz,CellStyleFactory cellStyleFactory) throws HeaderNotFindException{
         return createWorkbook(queue, clazz, new String[0], cellStyleFactory);
     }
@@ -494,6 +499,7 @@ public class ExcelUtil {
      * @param properties 表头字段名
      * @param <T>        声明的类型
      */
+    @SuppressWarnings("all")
     public static <T> void createSheet(Queue<T> queue, Workbook workbook, Class<T> clazz, String[] properties,CellStyleFactory cellStyleFactory) throws HeaderNotFindException {
         final Sheet sheet = workbook.createSheet();
         List<Field> fieldList = buildHeader(clazz, properties);
@@ -551,6 +557,7 @@ public class ExcelUtil {
      * @param object 要放入的实体对象
      * @throws Exception
      */
+    @SuppressWarnings("all")
     private static void setCellValueByType(Field field, Cell cell, Object object) throws Exception {
         CellType type = processExcelDictionaryCelltype(field);
         Object value = processExcelDictionaryKey(field, object);

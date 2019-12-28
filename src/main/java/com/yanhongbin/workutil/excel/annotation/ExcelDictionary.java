@@ -21,13 +21,11 @@ public @interface ExcelDictionary {
 
     /**
      * keyArray与valueArray应按顺序一一对应
-     * @return
      */
     String[] keyArray() default {};
 
     /**
      * valueArray与keyArray应按顺序一一对应
-     * @return
      */
     String[] valueArray() default {};
 

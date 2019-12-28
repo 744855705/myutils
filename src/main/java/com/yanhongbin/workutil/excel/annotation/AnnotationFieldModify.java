@@ -21,7 +21,7 @@ public class AnnotationFieldModify {
      * @throws NoSuchFieldException throws by {@link Field#get}
      * @throws IllegalAccessException throws by {@link Field#set}
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("all")
     public static void modifyAnnotationFieldValue(Annotation annotation, Map map) throws NoSuchFieldException, IllegalAccessException {
         // 取出注解的代理对象
         if (annotation == null) {
@@ -63,6 +63,7 @@ public class AnnotationFieldModify {
      * @throws NoSuchFieldException throws by {@link Field#get}
      * @throws IllegalAccessException throws by {@link Field#set}
      */
+    @SuppressWarnings("all")
     public static void modifyAnnotationExcelDictionary(Class<?> clazz, String field,Map<String,String> dictionaryMap) throws NoSuchFieldException, IllegalAccessException {
         if (dictionaryMap == null) {
             return;
@@ -111,6 +112,7 @@ public class AnnotationFieldModify {
      * @throws IllegalAccessException throws by {@link Field#set}
      * @throws InvocationTargetException throws by {@link Method#invoke(Object, Object...)}
      */
+    @SuppressWarnings("all")
     public static <T extends Enum> Map<String, String> enumToMap(Class<T> clazz, String keyName, String valueName) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         T[] enumConstants = clazz.getEnumConstants();
         Method getKey = clazz.getDeclaredMethod(toGetMethodName(keyName));
@@ -127,6 +129,7 @@ public class AnnotationFieldModify {
      * @param fieldName
      * @return
      */
+    @SuppressWarnings("all")
     public static String toGetMethodName(String fieldName) {
         String s = fieldName.substring(0, 1).toUpperCase();
         return "get" + s + fieldName.substring(1);
