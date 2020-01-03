@@ -12,7 +12,6 @@ import com.yanhongbin.workutil.web.util.RequestUtil;
 import com.yanhongbin.workutil.web.util.ResponseUtil;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.hssf.usermodel.HSSFRichTextString;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import com.yanhongbin.workutil.excel.enumerate.CellType;
 import org.apache.poi.ss.usermodel.*;
@@ -24,28 +23,31 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 
 /**
  * Created with IDEA
  * description: excel工具类
- *              配合{@link Excel}注解使用
- *              基于org.apache.poi version 4.1.1
- *              JDK8
+ * 配合{@link Excel}注解使用
+ * 基于org.apache.poi version 4.1.1
+ * JDK8
+ *
  * @author :YanHongBin
  * @version 1.0
  * @date :Created in 2019/12/4 13:53
  */
 public class ExcelUtil {
 
-    private static Logger log =  LoggerFactory.getLogger(ExcelUtil.class);
+    private static Logger log = LoggerFactory.getLogger(ExcelUtil.class);
 
     /**
      * 一页最大行数
      */
-    private static Integer SHEET_SIZE = 2<<15;
+    private static Integer SHEET_SIZE = 2 << 15;
 
     /**
      * 火狐
@@ -66,18 +68,43 @@ public class ExcelUtil {
      * 文件名时间格式化 pattern
      */
     private static String FILENAME_PATTERN = "yyyy年MM月dd日 HH时mm分";
+    /**
+     * 文件名时间格式化 DateTimeFormatter
+     */
+    private static DateTimeFormatter filenameFormatter = DateTimeFormatter.ofPattern(FILENAME_PATTERN);
 
     /**
      * excel中时间格式化 pattern
      */
     private static String DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
+
+    /**
+     * 导出excel中时间格式化 DateTimeFormatter
+     */
+    private static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
+
+    /**
+     * 默认时区
+     */
+    private static ZoneId zoneId = ZoneId.systemDefault();
+
+    /**
+     * 设置导出的Excel时间格式化 pattern
+     * @param dateFormatPattern 时间格式化 pattern
+     */
     public static void setDateFormatPattern(String dateFormatPattern) {
         DATE_FORMAT_PATTERN = dateFormatPattern;
+        dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
     }
 
+    /**
+     * 设置导出文件名的时间格式化 pattern
+     * @param filenamePattern 时间格式化 pattern
+     */
     public static void setFilenamePattern(String filenamePattern) {
         FILENAME_PATTERN = filenamePattern;
+        filenameFormatter = DateTimeFormatter.ofPattern(FILENAME_PATTERN);
     }
 
     /**
@@ -110,49 +137,50 @@ public class ExcelUtil {
 
     /**
      * 将对象列表转换为文件,写入response输出流
-     * @param clazz 类型
-     * @param queue 实体list
+     *
+     * @param clazz            类型
+     * @param queue            实体list
      * @param cellStyleFactory 单元格格式工厂
-     * @param <T>   声明的类型
+     * @param <T>              声明的类型
      */
-    public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue,CellStyleFactory cellStyleFactory) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
+    public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue, CellStyleFactory cellStyleFactory) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
         createWorkbook(queue, clazz, cellStyleFactory)
                 .write(getOutPutStream(clazz));
     }
 
 
-
     /**
      * 按照传入的表头将对象列表转换为文件,写入response输出流
      *
-     * @param clazz 类型
-     * @param queue 实体list
+     * @param clazz      类型
+     * @param queue      实体list
      * @param properties 表头
-     * @param <T>   声明的类型
-     * @see ExcelUtil#createWorkbook(Queue, Class, String[],CellStyleFactory)
+     * @param <T>        声明的类型
+     * @see ExcelUtil#createWorkbook(Queue, Class, String[], CellStyleFactory)
      */
     public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue, String[] properties) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
-        createWorkbook(queue, clazz, properties,null)
+        createWorkbook(queue, clazz, properties, null)
                 .write(getOutPutStream(clazz));
     }
 
     /**
      * 按照传入的表头将对象列表转换为文件,写入response输出流
      *
-     * @param clazz 类型
-     * @param queue 实体list
-     * @param properties 表头
+     * @param clazz            类型
+     * @param queue            实体list
+     * @param properties       表头
      * @param cellStyleFactory 单元格格式工厂
-     * @param <T>   声明的类型
-     * @see ExcelUtil#createWorkbook(Queue, Class, String[],CellStyleFactory)
+     * @param <T>              声明的类型
+     * @see ExcelUtil#createWorkbook(Queue, Class, String[], CellStyleFactory)
      */
-    public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue, String[] properties,CellStyleFactory cellStyleFactory) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
-        createWorkbook(queue, clazz, properties,cellStyleFactory)
+    public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue, String[] properties, CellStyleFactory cellStyleFactory) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
+        createWorkbook(queue, clazz, properties, cellStyleFactory)
                 .write(getOutPutStream(clazz));
     }
 
     /**
      * 设置输出流,加入文件名
+     *
      * @param clazz 获取文件名需要class
      * @return
      * @throws IOException
@@ -183,6 +211,7 @@ public class ExcelUtil {
 
     /**
      * 生成文件名
+     *
      * @param clazz Class
      * @return
      */
@@ -190,11 +219,16 @@ public class ExcelUtil {
     private static String getFileName(Class<?> clazz) throws AnnotationNotFoundException {
         FileName fileNameAnnotation = clazz.getAnnotation(FileName.class);
         if (fileNameAnnotation == null) {
-            throw new AnnotationNotFoundException(clazz,FileName.class);
+            throw new AnnotationNotFoundException(clazz, FileName.class);
         }
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(FILENAME_PATTERN);
-        String format = simpleDateFormat.format(new Date());
-        return fileNameAnnotation.value()+ format +".xls";
+
+        String format = filenameFormatter.format(
+                LocalDateTime.ofInstant(
+                        (new Date()).toInstant(),  zoneId
+                )
+        );
+
+        return fileNameAnnotation.value() + format + ".xls";
     }
 
     /**
@@ -207,7 +241,7 @@ public class ExcelUtil {
      * @throws Exception
      */
     @SuppressWarnings("all")
-    public static <T> void exampleWorkbookOutPut(Class<T> clazz, HttpServletResponse response, String[] properties) throws HeaderNotFindException,IOException {
+    public static <T> void exampleWorkbookOutPut(Class<T> clazz, HttpServletResponse response, String[] properties) throws HeaderNotFindException, IOException {
         createExampleWorkbook(clazz, properties)
                 .write(response.getOutputStream());
     }
@@ -331,7 +365,7 @@ public class ExcelUtil {
         switch (type) {
             case STRING:
                 // 对字典类型进行特殊处理
-                value = processExcelDictionaryValue(cell.getStringCellValue(),field);
+                value = processExcelDictionaryValue(cell.getStringCellValue(), field);
                 if (fieldType.equals(Integer.class)) {
                     // 字典字段为int型
                     value = Integer.parseInt(String.valueOf(value));
@@ -374,6 +408,7 @@ public class ExcelUtil {
 
     /**
      * 判断是否是字典类型,是则匹配字典,返回字典对应值,不是则直接返回字段值
+     *
      * @param value 字段对应值
      * @param field 字段本身
      * @return value
@@ -392,11 +427,12 @@ public class ExcelUtil {
                 index++;
             }
             throw new ExcelDictionaryMatchException("字典匹配失败,请检查键值 " + value + " 是否存在于valueArray中");
-        }else{
+        } else {
             return value;
         }
 
     }
+
     /**
      * 将传入的MultipartFile 类型的excel文件转换为poi的Workbook
      *
@@ -404,6 +440,12 @@ public class ExcelUtil {
      * @return Workbook
      */
     private static Workbook createWorkbookFile(MultipartFile file) throws IOException, EncryptedDocumentException {
+//        Workbook workbook = null;
+//        try{
+//            workbook = WorkbookFactory.create(file.getInputStream());
+//        }catch (IllegalArgumentException | POIXMLException e) {
+////                e.printStackTrace();
+//        }
         return WorkbookFactory.create(file.getInputStream());
     }
 
@@ -417,7 +459,7 @@ public class ExcelUtil {
      */
     private static <T> List<Field> buildHeader(Class<T> clazz, String[] properties) throws HeaderNotFindException {
         // 获取所有字段,包括父类中的字段,并且字段被@Excel注解修饰
-        List<Field> fields = FieldUtil.getFieldsListWithAnnotation(clazz,Excel.class);
+        List<Field> fields = FieldUtil.getFieldsListWithAnnotation(clazz, Excel.class);
         List<Field> fieldList = new ArrayList<>(fields.size());
         if (properties == null || properties.length == 0) {
             // 默认拿出所有被Excel修饰的字段
@@ -450,7 +492,6 @@ public class ExcelUtil {
     }
 
 
-
     /**
      * 构建excel文件
      *
@@ -460,7 +501,22 @@ public class ExcelUtil {
      * @return Workbook
      */
     @SuppressWarnings("all")
-    public static <T> Workbook createWorkbook(Queue<T> queue, Class<T> clazz,CellStyleFactory cellStyleFactory) throws HeaderNotFindException{
+    public static <T> Workbook createWorkbook(Queue<T> queue, Class<T> clazz) throws HeaderNotFindException {
+        return createWorkbook(queue, clazz, new String[0], null);
+    }
+
+    /**
+     * 构建excel文件
+     *
+     * @param queue 要导出的queue
+     * @param clazz 对应的对象类型
+     * @param cellStyleFactory 导出样式工厂
+     * @param <T>
+     * @return Workbook
+     * @throws HeaderNotFindException
+     */
+    @SuppressWarnings("all")
+    public static <T> Workbook createWorkbook(Queue<T> queue, Class<T> clazz, CellStyleFactory cellStyleFactory) throws HeaderNotFindException {
         return createWorkbook(queue, clazz, new String[0], cellStyleFactory);
     }
 
@@ -500,11 +556,11 @@ public class ExcelUtil {
      * @param <T>        声明的类型
      */
     @SuppressWarnings("all")
-    public static <T> void createSheet(Queue<T> queue, Workbook workbook, Class<T> clazz, String[] properties,CellStyleFactory cellStyleFactory) throws HeaderNotFindException {
+    public static <T> void createSheet(Queue<T> queue, Workbook workbook, Class<T> clazz, String[] properties, CellStyleFactory cellStyleFactory) throws HeaderNotFindException {
         final Sheet sheet = workbook.createSheet();
         List<Field> fieldList = buildHeader(clazz, properties);
         // 构建表头
-        createRowHeader(cellStyleFactory,sheet, fieldList);
+        createRowHeader(cellStyleFactory, sheet, fieldList);
         int queueSize = queue.size();
         int sheetSize;
         if (queueSize < SHEET_SIZE) {
@@ -517,10 +573,10 @@ public class ExcelUtil {
         // 避开表头,循环生成Row
         for (int i = 1; i <= sheetSize; i++) {
             Row iRow = sheet.createRow(i);
-            createCell(cellStyleFactory,queue, iRow, fieldList);
+            createCell(cellStyleFactory, queue, iRow, fieldList);
         }
         int size = fieldList.size();
-        for (int i = 0; i <size ; i++) {
+        for (int i = 0; i < size; i++) {
             sheet.autoSizeColumn(i);
         }
     }
@@ -569,7 +625,12 @@ public class ExcelUtil {
             case STRING:
                 // 处理时间类型Date
                 if (field.getType() == Date.class) {
-                    value = new SimpleDateFormat(DATE_FORMAT_PATTERN).format((Date)value);
+                    // 改用 DateTimeFormatter 格式化时间
+                    value = dateTimeFormatter.format(
+                            LocalDateTime.ofInstant(
+                                    ((Date) value).toInstant(),  zoneId
+                            )
+                    );
                 }
                 cell.setCellType(org.apache.poi.ss.usermodel.CellType.STRING);
                 cell.setCellValue(String.valueOf(value));
@@ -604,6 +665,7 @@ public class ExcelUtil {
 
     /**
      * 对字典类型进行特殊处理,单元格类型设置为文本
+     *
      * @param field 字段
      * @return CellType
      */
@@ -626,9 +688,9 @@ public class ExcelUtil {
      * 导出时处理字典类型,如果字段是字典类型,返回匹配后的值,不是则直接返回value
      *
      * @param field 字段
-     * @param obj 要导出的实体
+     * @param obj   要导出的实体
      * @return value
-     * @throws IllegalAccessException Field::get方法抛出的异常
+     * @throws IllegalAccessException        Field::get方法抛出的异常
      * @throws ExcelDictionaryMatchException 标识为字典字段,但是字典值匹配失败,抛出此异常
      */
     private static Object processExcelDictionaryKey(Field field, Object obj) throws IllegalAccessException, ExcelDictionaryMatchException {
@@ -695,13 +757,14 @@ public class ExcelUtil {
      * @param <T>   声明的类型
      * @return Workbook
      */
-    public static <T> Workbook createExampleWorkbook(Class<T> clazz) throws HeaderNotFindException{
+    public static <T> Workbook createExampleWorkbook(Class<T> clazz) throws HeaderNotFindException {
         return createExampleWorkbook(clazz, new String[0]);
     }
 
 
     /**
      * 获取该类所有被{@link Excel}注解修饰的字段的{@link Excel#value()}
+     *
      * @param clazz 要查询的Class对象
      * @return String[] properties
      * @throws AnnotationNotFoundException 未找到{@link Excel}注解时抛出此异常
@@ -709,16 +772,12 @@ public class ExcelUtil {
     public static String[] getAllProperties(Class<?> clazz) throws AnnotationNotFoundException {
         List<Field> fieldsListWithAnnotation = FieldUtil.getFieldsListWithAnnotation(clazz, Excel.class);
         if (fieldsListWithAnnotation.size() == 0) {
-            throw new AnnotationNotFoundException(clazz,Excel.class);
+            throw new AnnotationNotFoundException(clazz, Excel.class);
         }
         final String[] properties = new String[fieldsListWithAnnotation.size()];
         final int[] index = {0};
         fieldsListWithAnnotation.forEach(field -> properties[index[0]++] = field.getAnnotation(Excel.class).value());
         return properties;
     }
-    /*
-        192.168.1.58:13256/pay/order/getAllWithoutTest?startTime=2019-12-26%2017:48:30&endTime=2019-12-27%2017:48:30
-        192.168.1.58:13256/pay/order/getDeviceUseCount
-        192.168.1.58:13256/pay/order/getUserChargeCount
-     */
+
 }

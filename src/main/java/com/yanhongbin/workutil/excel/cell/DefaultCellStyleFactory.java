@@ -10,22 +10,8 @@ import org.apache.poi.ss.usermodel.*;
  * @author :YanHongBin
  * @date :Created in 2019/12/26 15:46
  */
-public class DefaultCellStyleFactory implements CellStyleFactory {
-
-    /**
-     * 生成样式的单元格文件
-     */
-    private Workbook workbook;
-
-    /**
-     * 默认单元格样式
-     */
-    private CellStyle defaultCellStyle;
-
-    /**
-     * 默认表头样式
-     */
-    private CellStyle headerCellStyle;
+public class DefaultCellStyleFactory extends CellStyleFactory {
+    
 
     public DefaultCellStyleFactory(Workbook workbook) {
         this.workbook = workbook;
@@ -90,8 +76,4 @@ public class DefaultCellStyleFactory implements CellStyleFactory {
         return cellStyle;
     }
 
-    @Override
-    public void setWorkbook(Workbook workbook) {
-        this.workbook = workbook;
-    }
 }

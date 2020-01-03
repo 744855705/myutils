@@ -12,24 +12,42 @@ import org.apache.poi.ss.usermodel.Workbook;
  * @author :YanHongBin
  * @date :Created in 2019/12/26 16:22
  */
-public interface CellStyleFactory {
+public abstract class CellStyleFactory {
+
+    /**
+     * 生成样式的单元格文件
+     */
+    protected Workbook workbook;
+
+    /**
+     * 默认单元格样式
+     */
+    protected CellStyle defaultCellStyle;
+
+    /**
+     * 默认表头样式
+     */
+    protected CellStyle headerCellStyle;
+
     /**
      * 获取单元格样式
      *
      * @return CellStyle
      */
-    CellStyle getCellStyle();
+    public abstract CellStyle getCellStyle();
 
     /**
      * 获取表头样式
      *
      * @return CellStyle
      */
-    CellStyle getHeaderCellStyle();
+    public abstract CellStyle getHeaderCellStyle();
 
     /**
      * 传入要创建样式的单元格对象
      * @param workbook 要创建样式的单元格对象
      */
-    void setWorkbook(Workbook workbook);
+    public void setWorkbook(Workbook workbook) {
+        this.workbook = workbook;
+    }
 }
