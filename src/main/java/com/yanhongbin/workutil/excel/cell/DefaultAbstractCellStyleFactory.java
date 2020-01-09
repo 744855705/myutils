@@ -1,6 +1,6 @@
 package com.yanhongbin.workutil.excel.cell;
 
-import com.yanhongbin.workutil.excel.cell.factoryinterface.CellStyleFactory;
+import com.yanhongbin.workutil.excel.cell.factoryinterface.AbstractCellStyleFactory;
 import org.apache.poi.ss.usermodel.*;
 
 /**
@@ -10,14 +10,14 @@ import org.apache.poi.ss.usermodel.*;
  * @author :YanHongBin
  * @date :Created in 2019/12/26 15:46
  */
-public class DefaultCellStyleFactory extends CellStyleFactory {
+public class DefaultAbstractCellStyleFactory extends AbstractCellStyleFactory {
     
 
-    public DefaultCellStyleFactory(Workbook workbook) {
+    public DefaultAbstractCellStyleFactory(Workbook workbook) {
         this.workbook = workbook;
     }
 
-    public DefaultCellStyleFactory() {
+    public DefaultAbstractCellStyleFactory() {
     }
 
     @Override
@@ -32,6 +32,7 @@ public class DefaultCellStyleFactory extends CellStyleFactory {
     @Override
     public synchronized CellStyle getHeaderCellStyle() {
         if (headerCellStyle == null) {
+            // 表头默认加粗
             headerCellStyle = initCellStyle(workbook,true);
         }
         return headerCellStyle;

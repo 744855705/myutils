@@ -3,8 +3,8 @@ package com.yanhongbin.workutil.excel.util;
 import com.yanhongbin.workutil.excel.annotation.Excel;
 import com.yanhongbin.workutil.excel.annotation.ExcelDictionary;
 import com.yanhongbin.workutil.excel.annotation.FileName;
-import com.yanhongbin.workutil.excel.cell.DefaultCellStyleFactory;
-import com.yanhongbin.workutil.excel.cell.factoryinterface.CellStyleFactory;
+import com.yanhongbin.workutil.excel.cell.DefaultAbstractCellStyleFactory;
+import com.yanhongbin.workutil.excel.cell.factoryinterface.AbstractCellStyleFactory;
 import com.yanhongbin.workutil.excel.exception.AnnotationNotFoundException;
 import com.yanhongbin.workutil.excel.exception.ExcelDictionaryMatchException;
 import com.yanhongbin.workutil.excel.exception.HeaderNotFindException;
@@ -45,9 +45,9 @@ public class ExcelUtil {
     private static Logger log = LoggerFactory.getLogger(ExcelUtil.class);
 
     /**
-     * 一页最大行数
+     * 一页最大行数 65535
      */
-    private static Integer SHEET_SIZE = 2 << 15;
+    private static Integer SHEET_SIZE = (2 << 15) - 1;
 
     /**
      * 火狐
@@ -128,11 +128,9 @@ public class ExcelUtil {
      * @param clazz 类型
      * @param queue 实体list
      * @param <T>   声明的类型
-     * @see ExcelUtil#createWorkbook(Queue, Class, CellStyleFactory)
      */
     public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
-        createWorkbook(queue, clazz, null)
-                .write(getOutPutStream(clazz));
+        excelOutPut(clazz, queue, new String[]{}, null);
     }
 
     /**
@@ -140,12 +138,11 @@ public class ExcelUtil {
      *
      * @param clazz            类型
      * @param queue            实体list
-     * @param cellStyleFactory 单元格格式工厂
+     * @param abstractCellStyleFactory 单元格格式工厂
      * @param <T>              声明的类型
      */
-    public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue, CellStyleFactory cellStyleFactory) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
-        createWorkbook(queue, clazz, cellStyleFactory)
-                .write(getOutPutStream(clazz));
+    public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue, AbstractCellStyleFactory abstractCellStyleFactory) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
+        excelOutPut(clazz, queue, new String[]{}, abstractCellStyleFactory);
     }
 
 
@@ -156,11 +153,10 @@ public class ExcelUtil {
      * @param queue      实体list
      * @param properties 表头
      * @param <T>        声明的类型
-     * @see ExcelUtil#createWorkbook(Queue, Class, String[], CellStyleFactory)
+     * @see ExcelUtil#createWorkbook(Queue, Class, String[], AbstractCellStyleFactory)
      */
     public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue, String[] properties) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
-        createWorkbook(queue, clazz, properties, null)
-                .write(getOutPutStream(clazz));
+        excelOutPut(clazz, queue, properties, null);
     }
 
     /**
@@ -169,12 +165,13 @@ public class ExcelUtil {
      * @param clazz            类型
      * @param queue            实体list
      * @param properties       表头
-     * @param cellStyleFactory 单元格格式工厂
+     * @param abstractCellStyleFactory 单元格格式工厂
      * @param <T>              声明的类型
-     * @see ExcelUtil#createWorkbook(Queue, Class, String[], CellStyleFactory)
+     * @see ExcelUtil#createWorkbook(Queue, Class, String[], AbstractCellStyleFactory)
      */
-    public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue, String[] properties, CellStyleFactory cellStyleFactory) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
-        createWorkbook(queue, clazz, properties, cellStyleFactory)
+    @SuppressWarnings("all")
+    public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue, String[] properties, AbstractCellStyleFactory abstractCellStyleFactory) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
+        createWorkbook(queue, clazz, properties, abstractCellStyleFactory)
                 .write(getOutPutStream(clazz));
     }
 
@@ -374,18 +371,7 @@ public class ExcelUtil {
             case NUMERIC:
                 // 数字取出会转换为Double类型,需进行处理
                 Double doubleValue = cell.getNumericCellValue();
-                long round = Math.round(doubleValue);
-                if (Double.parseDouble(round + ".0") == doubleValue) {
-                    // long型
-                    value = round;
-                    if (fieldType.equals(Integer.class)) {
-                        // 字段为int型
-                        value = Integer.parseInt(String.valueOf(round));
-                    }
-                } else {
-                    // 浮点型
-                    value = doubleValue;
-                }
+                value = processDoubleValue(doubleValue, fieldType);
                 break;
             case ERROR:
                 value = cell.getErrorCellValue();
@@ -404,6 +390,27 @@ public class ExcelUtil {
                 value = cell.getStringCellValue();
         }
         return value;
+    }
+
+    /**
+     * 处理double类型的value
+     * @param doubleValue doubleValue
+     * @param fieldType 字段java类型
+     * @return Object类型的value
+     */
+    private static Object processDoubleValue(Double doubleValue, Class<?> fieldType) {
+        long round = Math.round(doubleValue);
+        if (Double.parseDouble(round + ".0") == doubleValue) {
+            if (fieldType.equals(Integer.class)) {
+                // 字段为int型
+                return Integer.parseInt(String.valueOf(round));
+            }
+            // long型
+            return round;
+        } else {
+            // 浮点型
+            return doubleValue;
+        }
     }
 
     /**
@@ -430,7 +437,6 @@ public class ExcelUtil {
         } else {
             return value;
         }
-
     }
 
     /**
@@ -440,12 +446,6 @@ public class ExcelUtil {
      * @return Workbook
      */
     private static Workbook createWorkbookFile(MultipartFile file) throws IOException, EncryptedDocumentException {
-//        Workbook workbook = null;
-//        try{
-//            workbook = WorkbookFactory.create(file.getInputStream());
-//        }catch (IllegalArgumentException | POIXMLException e) {
-////                e.printStackTrace();
-//        }
         return WorkbookFactory.create(file.getInputStream());
     }
 
@@ -491,35 +491,6 @@ public class ExcelUtil {
         return fieldList;
     }
 
-
-    /**
-     * 构建excel文件
-     *
-     * @param queue 要导出的queue
-     * @param clazz 对应的对象类型
-     * @param <T>   声明的类型
-     * @return Workbook
-     */
-    @SuppressWarnings("all")
-    public static <T> Workbook createWorkbook(Queue<T> queue, Class<T> clazz) throws HeaderNotFindException {
-        return createWorkbook(queue, clazz, new String[0], null);
-    }
-
-    /**
-     * 构建excel文件
-     *
-     * @param queue 要导出的queue
-     * @param clazz 对应的对象类型
-     * @param cellStyleFactory 导出样式工厂
-     * @param <T>
-     * @return Workbook
-     * @throws HeaderNotFindException
-     */
-    @SuppressWarnings("all")
-    public static <T> Workbook createWorkbook(Queue<T> queue, Class<T> clazz, CellStyleFactory cellStyleFactory) throws HeaderNotFindException {
-        return createWorkbook(queue, clazz, new String[0], cellStyleFactory);
-    }
-
     /**
      * 构建excel文件
      *
@@ -529,25 +500,25 @@ public class ExcelUtil {
      * @param <T>        声明的类型
      * @return Workbook
      */
-    private static <T> Workbook createWorkbook(Queue<T> queue, Class<T> clazz, String[] properties, CellStyleFactory cellStyleFactory) throws HeaderNotFindException {
+    private static <T> Workbook createWorkbook(Queue<T> queue, Class<T> clazz, String[] properties, AbstractCellStyleFactory abstractCellStyleFactory) throws HeaderNotFindException {
         HSSFWorkbook workbook = new HSSFWorkbook();
-        if (cellStyleFactory == null) {
+        if (abstractCellStyleFactory == null) {
             // 如果没有定义格式工厂,使用默认工厂
-            cellStyleFactory = new DefaultCellStyleFactory();
+            abstractCellStyleFactory = new DefaultAbstractCellStyleFactory();
         }
         // 将要设置格式的单元格对象传入
-        cellStyleFactory.setWorkbook(workbook);
+        abstractCellStyleFactory.setWorkbook(workbook);
         // 页码数
         double sheetNo = Math.ceil(queue.size() / SHEET_SIZE) + 1;
         for (int i = 0; i < sheetNo; i++) {
-            createSheet(queue, workbook, clazz, properties, cellStyleFactory);
+            createSheet(queue, workbook, clazz, properties, abstractCellStyleFactory);
             workbook.setSheetName(i, "第" + (i + 1) + "页");
         }
         return workbook;
     }
 
     /**
-     * 创建sheet 最大65536
+     * 创建sheet 最大65535
      *
      * @param queue      传入的对象列表建议使用LinkedList兼容List与队列
      * @param workbook   创建的Workbook对象
@@ -556,11 +527,11 @@ public class ExcelUtil {
      * @param <T>        声明的类型
      */
     @SuppressWarnings("all")
-    public static <T> void createSheet(Queue<T> queue, Workbook workbook, Class<T> clazz, String[] properties, CellStyleFactory cellStyleFactory) throws HeaderNotFindException {
+    public static <T> void createSheet(Queue<T> queue, Workbook workbook, Class<T> clazz, String[] properties, AbstractCellStyleFactory abstractCellStyleFactory) throws HeaderNotFindException {
         final Sheet sheet = workbook.createSheet();
         List<Field> fieldList = buildHeader(clazz, properties);
         // 构建表头
-        createRowHeader(cellStyleFactory, sheet, fieldList);
+        createRowHeader(abstractCellStyleFactory, sheet, fieldList);
         int queueSize = queue.size();
         int sheetSize;
         if (queueSize < SHEET_SIZE) {
@@ -573,7 +544,7 @@ public class ExcelUtil {
         // 避开表头,循环生成Row
         for (int i = 1; i <= sheetSize; i++) {
             Row iRow = sheet.createRow(i);
-            createCell(cellStyleFactory, queue, iRow, fieldList);
+            createCell(abstractCellStyleFactory, queue, iRow, fieldList);
         }
         int size = fieldList.size();
         for (int i = 0; i < size; i++) {
@@ -589,12 +560,12 @@ public class ExcelUtil {
      * @param fieldList 导出的fieldlist
      * @param <T>       声明的类型
      */
-    private static <T> void createCell(CellStyleFactory cellStyleFactory, Queue<T> queue, Row row, List<Field> fieldList) {
+    private static <T> void createCell(AbstractCellStyleFactory abstractCellStyleFactory, Queue<T> queue, Row row, List<Field> fieldList) {
         int[] index = {0};
         T poll = queue.poll();
         fieldList.forEach(field -> {
             Cell cell = row.createCell(index[0]++);
-            cell.setCellStyle(cellStyleFactory.getCellStyle());
+            cell.setCellStyle(abstractCellStyleFactory.getCellStyle());
             // 取队列头,按照当前field指定的类型,放入单元格Cell
             try {
                 setCellValueByType(field, cell, poll);
@@ -723,12 +694,12 @@ public class ExcelUtil {
      * @param sheet     当前页sheet对象
      * @param fieldList 对应字段列表
      */
-    private static void createRowHeader(CellStyleFactory defaultCellStyleFactory, Sheet sheet, List<Field> fieldList) {
+    private static void createRowHeader(AbstractCellStyleFactory defaultAbstractCellStyleFactory, Sheet sheet, List<Field> fieldList) {
         Row row = sheet.createRow(0);
         int size = fieldList.size();
         for (int i = 0; i < size; i++) {
             Cell cell = row.createCell(i);
-            cell.setCellStyle(defaultCellStyleFactory.getHeaderCellStyle());
+            cell.setCellStyle(defaultAbstractCellStyleFactory.getHeaderCellStyle());
             cell.setCellValue(fieldList.get(i).getAnnotation(Excel.class).value());
         }
     }
@@ -745,7 +716,7 @@ public class ExcelUtil {
     private static <T> Workbook createExampleWorkbook(Class<T> clazz, String[] properties) throws HeaderNotFindException {
         HSSFWorkbook workbook = new HSSFWorkbook();
         // 示例文档使用默认格式工厂
-        createRowHeader(new DefaultCellStyleFactory(workbook), workbook.createSheet(), buildHeader(clazz, properties));
+        createRowHeader(new DefaultAbstractCellStyleFactory(workbook), workbook.createSheet(), buildHeader(clazz, properties));
         workbook.setSheetName(0, "第1页");
         return workbook;
     }
@@ -764,7 +735,7 @@ public class ExcelUtil {
 
     /**
      * 获取该类所有被{@link Excel}注解修饰的字段的{@link Excel#value()}
-     *
+     * 获取excel导出表头
      * @param clazz 要查询的Class对象
      * @return String[] properties
      * @throws AnnotationNotFoundException 未找到{@link Excel}注解时抛出此异常
