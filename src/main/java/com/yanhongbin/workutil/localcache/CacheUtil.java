@@ -18,7 +18,8 @@ public class CacheUtil {
     /**
      * 使用ConcurrentHashMap作为缓存，put 线程安全
      */
-    private static final ConcurrentHashMap<String, Node> cache = new ConcurrentHashMap<String, Node>(1<<3);
+    @SuppressWarnings("rawtypes")
+    private static final ConcurrentHashMap<String, Node> cache = new ConcurrentHashMap<>(1<<3);
 
     /**
      * 操作 expireQueue 时需上锁
@@ -28,6 +29,7 @@ public class CacheUtil {
     /**
      * 用来计算缓存过期的工具队列，线程不安全
      */
+    @SuppressWarnings("rawtypes")
     private static final PriorityQueue<Node> expireQueue = new PriorityQueue<>(1024);
 
     /**
@@ -68,13 +70,14 @@ public class CacheUtil {
      * @param expire 过期时间
      * @param <T> 泛型
      */
+    @SuppressWarnings("rawtypes")
     public static <T> void put(String key, T value, long expire) {
         Node<T> newNode = expire == -1L ? new Node<T>(key, value) : new Node<T>(key, value, expire);
         Node oldNode = cache.put(key, newNode);
         lock.lock();
         try {
             expireQueue.add(newNode);
-            if (oldNode == null) {
+            if (oldNode != null) {
                 expireQueue.remove(oldNode);
             }
         } finally {
@@ -98,6 +101,7 @@ public class CacheUtil {
      * 删除缓存内容
      * @param key key
      */
+    @SuppressWarnings("rawtypes")
     public static void delete(String key) {
         lock.lock();
         try {
@@ -141,6 +145,7 @@ public class CacheUtil {
     /**
      * 从缓存中删除过期的key
      */
+    @SuppressWarnings("rawtypes")
     public static void clearOverTimeNode() {
         lock.lock();
         try {
