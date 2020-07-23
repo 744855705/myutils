@@ -500,7 +500,7 @@ public class ExcelUtil {
      * @param <T>        声明的类型
      * @return Workbook
      */
-    private static <T> Workbook createWorkbook(Queue<T> queue, Class<T> clazz, String[] properties, AbstractCellStyleFactory abstractCellStyleFactory) throws HeaderNotFindException {
+    public static <T> Workbook createWorkbook(Queue<T> queue, Class<T> clazz, String[] properties, AbstractCellStyleFactory abstractCellStyleFactory) throws HeaderNotFindException {
         HSSFWorkbook workbook = new HSSFWorkbook();
         if (abstractCellStyleFactory == null) {
             // 如果没有定义格式工厂,使用默认工厂
