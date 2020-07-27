@@ -417,7 +417,9 @@ public class ExcelUtil {
      */
     private static Object processDoubleValue(Double doubleValue, Class<?> fieldType) {
         long round = Math.round(doubleValue);
+
         if (Double.parseDouble(round + ".0") == doubleValue) {
+            // 整数
             if (fieldType.equals(Integer.class)) {
                 // 字段为int型
                 return Integer.parseInt(String.valueOf(round));
