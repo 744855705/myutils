@@ -21,7 +21,6 @@ public class FieldUtil {
      * @param clazz Class对象
      * @return List<Field>
      */
-    @SuppressWarnings("all")
     public static List<Field> getAllFields(Class<?> clazz) {
         ArrayList<Field> allFields = new ArrayList<>();
         Class<?> currentClass = clazz;
@@ -39,7 +38,6 @@ public class FieldUtil {
      * @param annotationClazz 注解类
      * @return List<Field>
      */
-    @SuppressWarnings("all")
     public static List<Field> getFieldsListWithAnnotation(final Class<?> clazz, final Class<? extends Annotation> annotationClazz) {
         final List<Field> allFields =getAllFields(clazz);
         final List<Field> annotatedFields = new ArrayList<>();
