@@ -232,14 +232,16 @@ public class ExcelUtil {
         if (StringUtils.isEmpty(fileName)) {
             FileName fileNameAnnotation = clazz.getAnnotation(FileName.class);
             if (fileNameAnnotation == null) {
-                throw new AnnotationNotFoundException(clazz, FileName.class);
+                fileName = clazz.getSimpleName();
+            } else {
+                fileName = fileNameAnnotation.value();
             }
             String format = filenameFormatter.format(
                     LocalDateTime.ofInstant(
                             (new Date()).toInstant(), zoneId
                     )
             );
-            return fileNameAnnotation.value() + format + ".xls";
+            return fileName + format + ".xls";
         } else {
             return fileName.endsWith(".xls") ? fileName : fileName + ".xls";
         }
