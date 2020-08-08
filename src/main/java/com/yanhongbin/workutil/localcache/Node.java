@@ -134,12 +134,14 @@ public class Node<T> implements Comparable<Node>{
         }
 
         long r = this.getExpireTime() - o.getExpireTime();
-        if (r > 0) {
+        if (r > Integer.MAX_VALUE) {
             return 1;
         }
-        if (r < 0) {
-            return -1;
-        }
-        return 0;
+        return (int)r;
+    }
+
+
+    public static void main(String[] args) {
+        System.out.println(Integer.MAX_VALUE);
     }
 }

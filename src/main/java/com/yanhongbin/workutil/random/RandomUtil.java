@@ -62,7 +62,7 @@ public class RandomUtil {
      * @param probabilities 参与随机
      * @return markCode
      */
-    public static String getOneIRandomProbability(Collection<? extends IRandomProbability> probabilities) {
+    public static String getOneRandomProbability(Collection<? extends IRandomProbability> probabilities) {
         if (CollectionUtils.isEmpty(probabilities)) {
             return null;
         }
@@ -95,9 +95,9 @@ public class RandomUtil {
      * @param num 个数
      * @return markCode String
      */
-    public static List<String> getOneIRandomProbability(Collection<? extends IRandomProbability> probabilities, int num) {
+    public static List<String> getOneRandomProbability(Collection<? extends IRandomProbability> probabilities, int num) {
         if (num == 1) {
-            return Collections.singletonList(getOneIRandomProbability(probabilities));
+            return Collections.singletonList(getOneRandomProbability(probabilities));
         }
         if (CollectionUtils.isEmpty(probabilities)) {
             return null;
@@ -135,7 +135,7 @@ public class RandomUtil {
      * @param markCode 标记code
      * @return IRandomProbability
      */
-    public static IRandomProbability makeIRandomProbability(int percentage, String markCode){
+    public static IRandomProbability makeRandomProbability(int percentage, String markCode){
         return new IRandomProbability() {
             @Override
             public Integer getPercentage() {
