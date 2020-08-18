@@ -21,7 +21,7 @@ public class AnnotationFieldModify {
      * @throws NoSuchFieldException throws by {@link Field#get}
      * @throws IllegalAccessException throws by {@link Field#set}
      */
-    @SuppressWarnings("all")
+    @SuppressWarnings("unchecked")
     public static void modifyAnnotationFieldValue(Annotation annotation, Map map) throws NoSuchFieldException, IllegalAccessException {
         // 取出注解的代理对象
         if (annotation == null) {
@@ -97,6 +97,7 @@ public class AnnotationFieldModify {
      * @throws InvocationTargetException throws by {@link Method#invoke(Object, Object...)}
      * @throws NoSuchMethodException throws by {@link Class#getDeclaredMethod(String, Class[])}
      */
+    @SuppressWarnings("rawtypes")
     public static <T extends Enum> void modifyAnnotationExcelDictionary(Class<?> clazz, String field, Class<T> enumClazz, String keyName, String valueName) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, NoSuchFieldException {
         Map<String, String> enumToMap = enumToMap(enumClazz, keyName, valueName);
         modifyAnnotationExcelDictionary(clazz, field, enumToMap);

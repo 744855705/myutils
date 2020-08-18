@@ -6,17 +6,17 @@ import java.util.*;
 
 /**
  * Created with IDEA
- * description : Ëæ»úÊı¹¤¾ßÀà£¬Ô²×ÀËæ»úÊ¹ÓÃ
+ * description : éšæœºæ•°å·¥å…·ç±»ï¼Œåœ†æ¡Œéšæœºä½¿ç”¨
  *
- * @author £ºyanhongbin
- * @date : Created in 2020/6/2 10:53 ÉÏÎç
+ * @author ï¼šyanhongbin
+ * @date : Created in 2020/6/2 10:53 ä¸Šåˆ
  */
 public class RandomUtil {
 
     /**
-     * Ëæ»ú´Ó from µ½ to Ö®¼äµÄËæ»úÊı£¬ĞèÒªfrom Ğ¡ÓÚ to
-     * @param from ¿ªÊ¼Çø¼ä
-     * @param to ½áÊøÇø¼ä
+     * éšæœºä» from åˆ° to ä¹‹é—´çš„éšæœºæ•°ï¼Œéœ€è¦from å°äº to
+     * @param from å¼€å§‹åŒºé—´
+     * @param to ç»“æŸåŒºé—´
      * @return int
      */
     private static Integer random(int from, int to) {
@@ -24,7 +24,7 @@ public class RandomUtil {
     }
 
     /**
-     * Ëæ»ú´Ó 0 µ½ to Ö®¼äµÄËæ»úÊı
+     * éšæœºä» 0 åˆ° to ä¹‹é—´çš„éšæœºæ•°
      * @param to
      * @return int
      */
@@ -33,10 +33,10 @@ public class RandomUtil {
     }
 
     /**
-     * Ëæ»úfrom to Çø¼äÄÚµÄÒ»¸öËæ»úÊı
-     * @param from ¿ªÊ¼Çø¼ä
-     * @param to ½áÊøÇø¼ä
-     * @return from µ½ to Ö®¼äµÄÒ»¸öËæ»úÊı×Ö
+     * éšæœºfrom to åŒºé—´å†…çš„ä¸€ä¸ªéšæœºæ•°
+     * @param from å¼€å§‹åŒºé—´
+     * @param to ç»“æŸåŒºé—´
+     * @return from åˆ° to ä¹‹é—´çš„ä¸€ä¸ªéšæœºæ•°å­—
      */
     public static Integer randomFromTo(int from, int to){
         if (to > from) {
@@ -50,7 +50,7 @@ public class RandomUtil {
     }
 
     /**
-     * Ëæ»úUUID
+     * éšæœºUUID
      * @return uuid
      */
     public static String getRandomUUID(){
@@ -58,8 +58,8 @@ public class RandomUtil {
     }
 
     /**
-     * Ô²×ÀËæ»ú£¬µ¥¸ö
-     * @param probabilities ²ÎÓëËæ»ú
+     * åœ†æ¡Œéšæœºï¼Œå•ä¸ª
+     * @param probabilities å‚ä¸éšæœº
      * @return markCode
      */
     public static String getOneRandomProbability(Collection<? extends IRandomProbability> probabilities) {
@@ -90,9 +90,9 @@ public class RandomUtil {
     }
 
     /**
-     * Ô²×ÀËæ»ú ¶à¸ö
-     * @param probabilities ²ÎÓëËæ»ú
-     * @param num ¸öÊı
+     * åœ†æ¡Œéšæœº å¤šä¸ª
+     * @param probabilities å‚ä¸éšæœº
+     * @param num ä¸ªæ•°
      * @return markCode String
      */
     public static List<String> getOneRandomProbability(Collection<? extends IRandomProbability> probabilities, int num) {
@@ -130,9 +130,9 @@ public class RandomUtil {
     }
 
     /**
-     * ¹¹½¨²ÎÓëËæ»úµÄ¶ÔÏó
-     * @param percentage °Ù·Ö±È
-     * @param markCode ±ê¼Çcode
+     * æ„å»ºå‚ä¸éšæœºçš„å¯¹è±¡
+     * @param percentage ç™¾åˆ†æ¯”
+     * @param markCode æ ‡è®°code
      * @return IRandomProbability
      */
     public static IRandomProbability makeRandomProbability(int percentage, String markCode){

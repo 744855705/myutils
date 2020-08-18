@@ -4,19 +4,19 @@ package com.yanhongbin.workutil.random;
  * Created with IDEA
  * description :
  *
- * @author ：yanhongbin
- * @date : Created in 2020/8/5 3:10 下午
+ * @author 锛歽anhongbin
+ * @date : Created in 2020/8/5 3:10 涓嬪崍
  */
 public interface IRandomProbability {
 
     /**
-     * 获取占比
+     * 鑾峰彇鍗犳瘮
      * @return percentage
      */
     Integer getPercentage();
 
     /**
-     * 获取标记字段
+     * 鑾峰彇鏍囪瀛楁
      * @return markCode
      */
     String getMarkCode();

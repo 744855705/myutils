@@ -2,16 +2,16 @@ package com.yanhongbin.workutil.scheduled;
 
 /**
  * Created with IDEA
- * description : Ñ­»·ÑÓ³ÙÈÎÎñ
+ * description : å¾ªç¯å»¶è¿Ÿä»»åŠ¡
  *
- * @author £ºyanhongbin
- * @date : Created in 2020/5/29 11:43 ÉÏÎç
+ * @author ï¼šyanhongbin
+ * @date : Created in 2020/5/29 11:43 ä¸Šåˆ
  */
 public interface ScheduledCycleRunnableService extends ScheduledOnceRunnableService {
 
 
     /**
-     * Ò»´ÎÖ´ĞĞÖÕÖ¹ Óë ÏÂÒ»´ÎÖ´ĞĞ¿ªÊ¼Ö®¼äµÄÑÓ³Ù
+     * ä¸€æ¬¡æ‰§è¡Œç»ˆæ­¢ ä¸ ä¸‹ä¸€æ¬¡æ‰§è¡Œå¼€å§‹ä¹‹é—´çš„å»¶è¿Ÿ
      *
      * @return int
      */

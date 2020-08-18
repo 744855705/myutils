@@ -11,11 +11,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created with IDEA
- * description : {@link ScheduledExecutorService} ´úÀíÀà
- *              ÓÃÓÚÑÓ³ÙÈÎÎñÖ´ĞĞ¡¢Ñ­»·ÑÓ³ÙÈÎÎñµÄÖ´ĞĞ
+ * description : {@link ScheduledExecutorService} ä»£ç†ç±»
+ *              ç”¨äºå»¶è¿Ÿä»»åŠ¡æ‰§è¡Œã€å¾ªç¯å»¶è¿Ÿä»»åŠ¡çš„æ‰§è¡Œ
  *
- * @author £ºyanhongbin
- * @date : Created in 2020/5/29 10:55 ÉÏÎç
+ * @author ï¼šyanhongbin
+ * @date : Created in 2020/5/29 10:55 ä¸Šåˆ
  */
 public class ScheduledExecutorProxy {
     private static final ScheduledExecutorService scheduledExecutorService =
@@ -27,73 +27,73 @@ public class ScheduledExecutorProxy {
     }
 
     static {
-        // jvm¹Ø±ÕµÄÊ±ºò¹Ø±ÕÏß³Ì³Ø£¬ÒòÎªjvm¹Ø±Õ»áÏú»ÙÄÚ´æ£¬ËùÒÔ¿ÉÒÔÖ±½ÓÊ¹ÓÃ shutdownNow ·½Ê½¹Ø±Õ
-        // jdk 1.8Ö®ºóÊ¹ÓÃ
+        // jvmå…³é—­çš„æ—¶å€™å…³é—­çº¿ç¨‹æ± ï¼Œå› ä¸ºjvmå…³é—­ä¼šé”€æ¯å†…å­˜ï¼Œæ‰€ä»¥å¯ä»¥ç›´æ¥ä½¿ç”¨ shutdownNow æ–¹å¼å…³é—­
+        // jdk 1.8ä¹‹åä½¿ç”¨
 //        Runtime.getRuntime().addShutdownHook(new Thread(scheduledExecutorService::shutdownNow));
 
-        // jdk 1.7Ö®Ç°Ê¹ÓÃ
+        // jdk 1.7ä¹‹å‰ä½¿ç”¨
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             @Override
             public void run() {
-                log.info("ScheduledExecutorService Ïß³Ì³Ø ¹Ø±Õ");
+                log.info("ScheduledExecutorService çº¿ç¨‹æ±  å…³é—­");
                 scheduledExecutorService.shutdown();
             }
         }));
     }
 
     /**
-     * Ìá½»Ñ­»·ÑÓ³ÙÈÎÎñµ½Ïß³Ì³ØÖĞ
+     * æäº¤å¾ªç¯å»¶è¿Ÿä»»åŠ¡åˆ°çº¿ç¨‹æ± ä¸­
      * @param r runnable
-     * @param initialDelay Ê×´ÎÖ´ĞĞµÄÑÓ³ÙÊ±¼ä
-     * @param delay Ò»´ÎÖ´ĞĞÖÕÖ¹ Óë ÏÂÒ»´ÎÖ´ĞĞ¿ªÊ¼Ö®¼äµÄÑÓ³Ù
-     * @param unit Ê±¼äµ¥Î»
+     * @param initialDelay é¦–æ¬¡æ‰§è¡Œçš„å»¶è¿Ÿæ—¶é—´
+     * @param delay ä¸€æ¬¡æ‰§è¡Œç»ˆæ­¢ ä¸ ä¸‹ä¸€æ¬¡æ‰§è¡Œå¼€å§‹ä¹‹é—´çš„å»¶è¿Ÿ
+     * @param unit æ—¶é—´å•ä½
      */
     public static void scheduleWithFixedDelay(Runnable r, long initialDelay, long delay, TimeUnit unit) {
         scheduledExecutorService.scheduleWithFixedDelay(r, initialDelay, delay, unit);
     }
 
     /**
-     * Ìá½»Ñ­»·ÑÓ³ÙÈÎÎñµ½Ïß³Ì³ØÖĞ
+     * æäº¤å¾ªç¯å»¶è¿Ÿä»»åŠ¡åˆ°çº¿ç¨‹æ± ä¸­
      * @param r runnable
-     * @param initialDelay Ê×´ÎÖ´ĞĞµÄÑÓ³ÙÊ±¼ä µ¥Î»Ãë
-     * @param delay Ò»´ÎÖ´ĞĞÖÕÖ¹ Óë ÏÂÒ»´ÎÖ´ĞĞ¿ªÊ¼Ö®¼äµÄÑÓ³Ù µ¥Î»Ãë
+     * @param initialDelay é¦–æ¬¡æ‰§è¡Œçš„å»¶è¿Ÿæ—¶é—´ å•ä½ç§’
+     * @param delay ä¸€æ¬¡æ‰§è¡Œç»ˆæ­¢ ä¸ ä¸‹ä¸€æ¬¡æ‰§è¡Œå¼€å§‹ä¹‹é—´çš„å»¶è¿Ÿ å•ä½ç§’
      */
     public static void scheduleWithFixedDelaySeconds(Runnable r, long initialDelay, long delay) {
         scheduleWithFixedDelay(r, initialDelay, delay, TimeUnit.SECONDS);
     }
 
     /**
-     * Ìá½»Ñ­»·ÑÓ³ÙÈÎÎñµ½Ïß³Ì³ØÖĞ
+     * æäº¤å¾ªç¯å»¶è¿Ÿä»»åŠ¡åˆ°çº¿ç¨‹æ± ä¸­
      * @param r runnable
-     * @param initialDelay Ê×´ÎÖ´ĞĞµÄÑÓ³ÙÊ±¼ä µ¥Î»·ÖÖÓ
-     * @param delay Ò»´ÎÖ´ĞĞÖÕÖ¹ Óë ÏÂÒ»´ÎÖ´ĞĞ¿ªÊ¼Ö®¼äµÄÑÓ³Ù µ¥Î»·ÖÖÓ
+     * @param initialDelay é¦–æ¬¡æ‰§è¡Œçš„å»¶è¿Ÿæ—¶é—´ å•ä½åˆ†é’Ÿ
+     * @param delay ä¸€æ¬¡æ‰§è¡Œç»ˆæ­¢ ä¸ ä¸‹ä¸€æ¬¡æ‰§è¡Œå¼€å§‹ä¹‹é—´çš„å»¶è¿Ÿ å•ä½åˆ†é’Ÿ
      */
     public static void scheduleWithFixedDelayMinutes(Runnable r, long initialDelay, long delay) {
         scheduleWithFixedDelay(r, initialDelay, delay, TimeUnit.MINUTES);
     }
 
     /**
-     * Ìá½»Ñ­»·ÑÓ³ÙÈÎÎñµ½Ïß³Ì³ØÖĞ
+     * æäº¤å¾ªç¯å»¶è¿Ÿä»»åŠ¡åˆ°çº¿ç¨‹æ± ä¸­
      * @param r runnable
-     * @param initialDelay Ê×´ÎÖ´ĞĞµÄÑÓ³ÙÊ±¼ä µ¥Î»Ğ¡Ê±
-     * @param delay Ò»´ÎÖ´ĞĞÖÕÖ¹ Óë ÏÂÒ»´ÎÖ´ĞĞ¿ªÊ¼Ö®¼äµÄÑÓ³Ù µ¥Î»Ğ¡Ê±
+     * @param initialDelay é¦–æ¬¡æ‰§è¡Œçš„å»¶è¿Ÿæ—¶é—´ å•ä½å°æ—¶
+     * @param delay ä¸€æ¬¡æ‰§è¡Œç»ˆæ­¢ ä¸ ä¸‹ä¸€æ¬¡æ‰§è¡Œå¼€å§‹ä¹‹é—´çš„å»¶è¿Ÿ å•ä½å°æ—¶
      */
     public static void scheduleWithFixedDelayHours(Runnable r, long initialDelay, long delay) {
         scheduleWithFixedDelay(r, initialDelay, delay, TimeUnit.HOURS);
     }
 
     /**
-     * Ìá½»Ñ­»·ÑÓ³ÙÈÎÎñµ½Ïß³Ì³ØÖĞ
+     * æäº¤å¾ªç¯å»¶è¿Ÿä»»åŠ¡åˆ°çº¿ç¨‹æ± ä¸­
      * @param r runnable
-     * @param initialDelay Ê×´ÎÖ´ĞĞµÄÑÓ³ÙÊ±¼ä µ¥Î»Ìì
-     * @param delay Ò»´ÎÖ´ĞĞÖÕÖ¹ Óë ÏÂÒ»´ÎÖ´ĞĞ¿ªÊ¼Ö®¼äµÄÑÓ³Ù µ¥Î»Ìì
+     * @param initialDelay é¦–æ¬¡æ‰§è¡Œçš„å»¶è¿Ÿæ—¶é—´ å•ä½å¤©
+     * @param delay ä¸€æ¬¡æ‰§è¡Œç»ˆæ­¢ ä¸ ä¸‹ä¸€æ¬¡æ‰§è¡Œå¼€å§‹ä¹‹é—´çš„å»¶è¿Ÿ å•ä½å¤©
      */
     public static void scheduleWithFixedDelayDays(Runnable r, long initialDelay, long delay) {
         scheduleWithFixedDelay(r, initialDelay, delay, TimeUnit.DAYS);
     }
 
     /**
-     * Ìá½»Ñ­»·ÑÓ³ÙÈÎÎñµ½Ïß³Ì³Ø£¬5ÃëºóÖ´ĞĞ£¬Ã¿5ÃëÖ´ĞĞÒ»´Î
+     * æäº¤å¾ªç¯å»¶è¿Ÿä»»åŠ¡åˆ°çº¿ç¨‹æ± ï¼Œ5ç§’åæ‰§è¡Œï¼Œæ¯5ç§’æ‰§è¡Œä¸€æ¬¡
      * @param r runnable
      */
     public static void scheduleWithFixedDelayFiveSeconds(Runnable r) {
@@ -102,7 +102,7 @@ public class ScheduledExecutorProxy {
 
     /**
      * {@link ScheduledExecutorProxy#scheduleWithFixedDelay(Runnable, long, long, TimeUnit)}
-     * @param scheduledCycleRunnableService ÈÎÎñ¶ÔÏó
+     * @param scheduledCycleRunnableService ä»»åŠ¡å¯¹è±¡
      */
     public static void scheduleWithFixedDelay(ScheduledCycleRunnableService scheduledCycleRunnableService) {
         scheduleWithFixedDelay(
@@ -114,17 +114,17 @@ public class ScheduledExecutorProxy {
     }
 
     /**
-     * Ìá½»µ¥´ÎÑÓ³ÙÈÎÎñµ½Ïß³Ì³Ø
+     * æäº¤å•æ¬¡å»¶è¿Ÿä»»åŠ¡åˆ°çº¿ç¨‹æ± 
      * @param r run
-     * @param initialDelay ÑÓ³ÙÊ±¼ä
-     * @param unit Ê±¼äµ¥Î»
+     * @param initialDelay å»¶è¿Ÿæ—¶é—´
+     * @param unit æ—¶é—´å•ä½
      */
     public static void schedule(Runnable r, long initialDelay, TimeUnit unit) {
         scheduledExecutorService.schedule(r, initialDelay, unit);
     }
 
     /**
-     * Ìá½»µ¥´ÎÑÓ³ÙÈÎÎñµ½Ïß³Ì³Ø{@link ScheduledExecutorProxy#schedule(Runnable, long, TimeUnit)}
+     * æäº¤å•æ¬¡å»¶è¿Ÿä»»åŠ¡åˆ°çº¿ç¨‹æ± {@link ScheduledExecutorProxy#schedule(Runnable, long, TimeUnit)}
      *
      * @param scheduledOnceRunnableService param
      */
@@ -137,20 +137,22 @@ public class ScheduledExecutorProxy {
     }
 
     /**
-     * Ìá½»µ¥´ÎÑÓ³ÙÈÎÎñµ½Ïß³Ì³Ø
+     * æäº¤å•æ¬¡å»¶è¿Ÿä»»åŠ¡åˆ°çº¿ç¨‹æ± 
      * @param r run
-     * @param initialDelay ÑÓ³ÙÊ±¼ä£¬µ¥Î»Ãë
+     * @param initialDelay å»¶è¿Ÿæ—¶é—´ï¼Œå•ä½ç§’
      */
     public static void schedule(Runnable r, long initialDelay) {
         schedule(r, initialDelay, TimeUnit.SECONDS);
     }
 
 
-
+    public static void shutdown(){
+        scheduledExecutorService.shutdown();
+    }
 
 
     /**
-     * ×Ô¶¨Òå Scheduled ThreadFactory
+     * è‡ªå®šä¹‰ Scheduled ThreadFactory
      */
     static class ScheduledThreadFactory implements ThreadFactory {
 

@@ -4,15 +4,15 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Created with IDEA
- * description : µ¥´ÎÑÓ³ÙÈÎÎñ
+ * description : å•æ¬¡å»¶è¿Ÿä»»åŠ¡
  *
- * @author £ºyanhongbin
- * @date : Created in 2020/6/28 2:19 ÏÂÎç
+ * @author ï¼šyanhongbin
+ * @date : Created in 2020/6/28 2:19 ä¸‹åˆ
  */
 public interface ScheduledOnceRunnableService extends Runnable {
 
     /**
-     * Ö´ĞĞµÄÑÓ³ÙÊ±¼ä
+     * æ‰§è¡Œçš„å»¶è¿Ÿæ—¶é—´
      *
      * @return int
      */
@@ -20,7 +20,7 @@ public interface ScheduledOnceRunnableService extends Runnable {
 
 
     /**
-     * Ê±¼äµ¥Î»
+     * æ—¶é—´å•ä½
      *
      * @return TimeUnit
      */

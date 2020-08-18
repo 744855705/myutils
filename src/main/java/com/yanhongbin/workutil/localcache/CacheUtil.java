@@ -5,10 +5,11 @@ import com.yanhongbin.workutil.scheduled.ScheduledExecutorProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.PriorityQueue;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
-
 
 /**
  * Created with IDEA
@@ -33,7 +34,7 @@ public class CacheUtil {
     /**
      * 操作 expireQueue 时需上锁
      */
-    private static final ReentrantLock lock = new ReentrantLock();
+    private static final ReentrantLock LOCK = new ReentrantLock();
 
     /**
      * 用来计算缓存过期的工具队列，线程不安全
@@ -42,7 +43,7 @@ public class CacheUtil {
     private static final PriorityQueue<Node> expireQueue = new PriorityQueue<Node>(1024);
 
     static {
-        ScheduledExecutorProxy.scheduleWithFixedDelayFiveSeconds(new ScheduledCycleRunnableServiceRemoveOverTimeNodeImpl());
+        ScheduledExecutorProxy.scheduleWithFixedDelayFiveSeconds(new RemoveOverTimeNode());
     }
 
 
@@ -68,14 +69,14 @@ public class CacheUtil {
     public static <T> void put(String key, T value, long expire) {
         Node<T> newNode = expire == -1L ? new Node<T>(key, value) : new Node<T>(key, value, expire);
         Node oldNode = cache.put(key, newNode);
-        lock.lock();
+        LOCK.lock();
         try {
             expireQueue.add(newNode);
             if (oldNode != null) {
                 expireQueue.remove(oldNode);
             }
         } finally {
-            lock.unlock();
+            LOCK.unlock();
         }
     }
 
@@ -125,12 +126,12 @@ public class CacheUtil {
      * @param key key
      */
     public static void delete(String key) {
-        lock.lock();
+        LOCK.lock();
         try {
             Node remove = cache.remove(key);
             expireQueue.remove(remove);
         } finally {
-            lock.unlock();
+            LOCK.unlock();
         }
     }
 
@@ -138,13 +139,13 @@ public class CacheUtil {
      * 清空缓存
      */
     public static void clear() {
-        lock.lock();
+        LOCK.lock();
         try {
             log.info("清空缓存");
             cache.clear();
             expireQueue.clear();
         } finally {
-            lock.unlock();
+            LOCK.unlock();
         }
     }
 
@@ -167,7 +168,7 @@ public class CacheUtil {
      * 从缓存中删除过期的key
      */
     public static void clearOverTimeNode() {
-        lock.lock();
+        LOCK.lock();
         try {
             while (true) {
                 Node peek = expireQueue.peek();
@@ -184,7 +185,84 @@ public class CacheUtil {
                 }
             }
         } finally {
-            lock.unlock();
+            LOCK.unlock();
         }
     }
+
+
+    /**
+     * 获取缓存内容，如果缓存中没有，则调用{@link IRefresh#getContent()} 方法，获取内容并放入缓存
+     * @param key key
+     * @param refresh 刷新方法
+     * @param <T> 缓存类型
+     * @return 缓存内容
+     */
+    public static <T> T getAndRefresh(String key, IRefresh<T> refresh){
+        T t = CacheUtil.get(key);
+        // 对象类型处理
+        if (t == null) {
+            log.info("未查到本地缓存，key:{}", key);
+            synchronized (key.intern()) {
+                t = CacheUtil.get(key);
+                if (t == null) {
+                    t = refreshContent(key, refresh);
+                }
+            }
+            return t;
+        }
+        // 集合类型处理
+        if (t instanceof Collection) {
+            return refreshCollection(key, refresh, t);
+        }
+        // Map 类型处理
+        if (t instanceof Map) {
+            return refreshMap(key, refresh, t);
+        }
+
+        return t;
+    }
+
+    /**
+     * 刷新map类型数据
+     * @param key key
+     * @param refresh 缓存刷新方法
+     * @param t 要刷新的对象
+     * @param <T> 对象类型
+     * @return 刷新后的对象
+     */
+    private static <T> T refreshMap(String key, IRefresh<T> refresh, T t) {
+        if (((Map) t).isEmpty()) {
+            log.info("未查到本地缓存，key:{}", key);
+            synchronized (key.intern()) {
+                t = CacheUtil.get(key);
+                if (t == null || ((Map) t).isEmpty()) {
+                    t = refreshContent(key, refresh);
+                }
+            }
+        }
+        return t;
+    }
+
+    private static <T> T refreshCollection(String key, IRefresh<T> refresh, T t) {
+        if (((Collection) t).isEmpty()) {
+            log.info("未查到本地缓存，key:{}", key);
+            synchronized (key.intern()) {
+                t = CacheUtil.get(key);
+                if ( t ==null || ((Collection) t).isEmpty()) {
+                    t = refreshContent(key, refresh);
+                }
+            }
+        }
+        return t;
+    }
+
+    public static <T> T refreshContent(String key, IRefresh<T> refresh) {
+        log.info("刷新缓存,key:{}", key);
+        T t = refresh.getContent();
+        CacheUtil.put(key, t, refresh.getExpire());
+        return t;
+    }
 }
+
+
+
