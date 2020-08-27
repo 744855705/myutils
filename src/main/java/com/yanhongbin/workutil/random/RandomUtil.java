@@ -1,5 +1,7 @@
 package com.yanhongbin.workutil.random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
@@ -13,13 +15,18 @@ import java.util.*;
  */
 public class RandomUtil {
 
+    private static final Logger log = LoggerFactory.getLogger(RandomUtil.class);
+
     /**
-     * 随机从 from 到 to 之间的随机数，需要from 小于 to
+     * 随机从 from 到 to 之间的随机数
      * @param from 开始区间
      * @param to 结束区间
      * @return int
      */
-    private static Integer random(int from, int to) {
+    public static int random(int from, int to) {
+        if (from == to) {
+            return from;
+        }
         return (int)(Math.random() * (to - from)) + from;
     }
 
@@ -28,29 +35,13 @@ public class RandomUtil {
      * @param to
      * @return int
      */
-    public static Integer random(int to) {
+    public static int random(int to) {
         return random(0, to);
     }
 
     /**
-     * 随机from to 区间内的一个随机数
-     * @param from 开始区间
-     * @param to 结束区间
-     * @return from 到 to 之间的一个随机数字
-     */
-    public static Integer randomFromTo(int from, int to){
-        if (to > from) {
-            return random(from, to);
-        } else if (to == from) {
-            return from;
-        } else {
-            return random(to, from);
-        }
-
-    }
-
-    /**
      * 随机UUID
+     * @return
      * @return uuid
      */
     public static String getRandomUUID(){
@@ -62,71 +53,60 @@ public class RandomUtil {
      * @param probabilities 参与随机
      * @return markCode
      */
-    public static String getOneRandomProbability(Collection<? extends IRandomProbability> probabilities) {
-        if (CollectionUtils.isEmpty(probabilities)) {
+    public static String getIRandomProbability(Collection<? extends IRandomProbability> probabilities) {
+        List<String> iRandomProbability = getIRandomProbability(probabilities, 1);
+        if (CollectionUtils.isEmpty(iRandomProbability)) {
             return null;
         }
-
-        if (probabilities.size() == 1) {
-            return probabilities.iterator().next().getMarkCode();
-        }
-
-        HashMap<String, Integer> map = new HashMap<String, Integer>();
-        int all = 0;
-
-        for (IRandomProbability probability : probabilities) {
-            all += probability.getPercentage();
-            map.put(probability.getMarkCode(), all);
-        }
-
-        Integer random = random(all);
-        for (Map.Entry<String, Integer> entry : map.entrySet()) {
-            Integer value = entry.getValue();
-            if (random < value) {
-                return entry.getKey();
-            }
-        }
-        return null;
+        return iRandomProbability.get(0);
     }
 
     /**
      * 圆桌随机 多个
+     *
      * @param probabilities 参与随机
-     * @param num 个数
+     * @param num           个数
      * @return markCode String
      */
-    public static List<String> getOneRandomProbability(Collection<? extends IRandomProbability> probabilities, int num) {
-        if (num == 1) {
-            return Collections.singletonList(getOneRandomProbability(probabilities));
-        }
+    public static List<String> getIRandomProbability(Collection<? extends IRandomProbability> probabilities, int num) {
+        log.info("随机结果个数：{}", num);
         if (CollectionUtils.isEmpty(probabilities)) {
-            return null;
+            return Collections.emptyList();
         }
-
-        if (probabilities.size() == 1) {
-            return Collections.singletonList(probabilities.iterator().next().getMarkCode());
-        }
-
-        HashMap<String, Integer> map = new HashMap<String, Integer>();
-        int all = 0;
-        for (IRandomProbability probability : probabilities) {
-            all += probability.getPercentage();
-            map.put(probability.getMarkCode(), all);
-        }
-
+        List<RandomProbabilityTemp> list = new LinkedList<>();
+        int all = getAll(probabilities, list);
+        log.info("概率相加总数：{}", all);
         List<String> result = new LinkedList<>();
         for (int i = 0; i < num; i++) {
-            Integer random = random(all);
-            RANDOM: for (Map.Entry<String, Integer> entry : map.entrySet()) {
-                Integer value = entry.getValue();
-                if (random < value) {
-                    result.add(entry.getKey());
-                    break RANDOM;
+            int random = random(all);
+            log.info("本次随机数：{}", random);
+            for (RandomProbabilityTemp randomProbabilityTemp : list) {
+                if (randomProbabilityTemp.match(random)) {
+                    log.info("命中：{}", randomProbabilityTemp);
+                    result.add(randomProbabilityTemp.getMarkCode());
+                    break;
                 }
             }
         }
-
         return result;
+    }
+
+    private static int getAll(Collection<? extends IRandomProbability> probabilities, List<RandomProbabilityTemp> list) {
+        Iterator<? extends IRandomProbability> iterator = probabilities.iterator();
+        int pre = 0;
+        int all = 0;
+        while (iterator.hasNext()) {
+            IRandomProbability probability = iterator.next();
+            Integer percentage = probability.getPercentage();
+            if (percentage == 0) {
+                iterator.remove();
+                continue;
+            }
+            all += probability.getPercentage();
+            list.add(new RandomProbabilityTemp(pre, probability.getMarkCode(), all));
+            pre = all;
+        }
+        return all;
     }
 
     /**
@@ -147,4 +127,41 @@ public class RandomUtil {
             }
         };
     }
+
+
+    /**
+     * 匹配使用内部类
+     */
+    static class RandomProbabilityTemp {
+        private final int pre;
+        private final String markCode;
+        private final int probability;
+
+        public RandomProbabilityTemp(int pre, String markCode, int probability) {
+            this.pre = pre;
+            this.markCode = markCode;
+            this.probability = probability;
+        }
+
+        public String getMarkCode() {
+            return markCode;
+        }
+
+        /**
+         * 匹配
+         */
+        public boolean match(int random) {
+            return random >= this.pre && random < this.probability;
+        }
+
+        @Override
+        public String toString() {
+            return "RandomProbability{" +
+                "pre=" + pre +
+                ", markCode='" + markCode + '\'' +
+                ", probability=" + probability +
+                '}';
+        }
+    }
+
 }

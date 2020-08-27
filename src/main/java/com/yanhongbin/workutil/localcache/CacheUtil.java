@@ -40,7 +40,7 @@ public class CacheUtil {
      * 用来计算缓存过期的工具队列，线程不安全
      */
     @SuppressWarnings("rawtypes")
-    private static final PriorityQueue<Node> expireQueue = new PriorityQueue<Node>(1024);
+    private static final PriorityQueue<Node> expireQueue = new PriorityQueue<Node>(2<<10);
 
     static {
         ScheduledExecutorProxy.scheduleWithFixedDelayFiveSeconds(new RemoveOverTimeNode());
@@ -197,7 +197,7 @@ public class CacheUtil {
      * @param <T> 缓存类型
      * @return 缓存内容
      */
-    public static <T> T getAndRefresh(String key, IRefresh<T> refresh){
+    public static <T> T getAndRefresh(String key,IRefresh<T> refresh){
         T t = CacheUtil.get(key);
         // 对象类型处理
         if (t == null) {
@@ -210,6 +210,10 @@ public class CacheUtil {
             }
             return t;
         }
+        if (t instanceof String) {
+            return refreshString(key, refresh, t);
+        }
+
         // 集合类型处理
         if (t instanceof Collection) {
             return refreshCollection(key, refresh, t);
@@ -220,6 +224,23 @@ public class CacheUtil {
         }
 
         return t;
+    }
+
+    private static <T> T refreshString(String key, IRefresh<T> refresh, T t) {
+        if (isEmptyOrBlank((String) t)) {
+            log.info("未查到本地缓存，key:{}", key);
+            synchronized (key.intern()) {
+                t = CacheUtil.get(key);
+                if (isEmptyOrBlank((String) t)) {
+                    t = refreshContent(key, refresh);
+                }
+            }
+        }
+        return t;
+    }
+
+    private static boolean isEmptyOrBlank(String t) {
+        return t == null || t.length() == 0 || t.trim().length() == 0 || "null".equals(t) || "NULL".equals(t) ;
     }
 
     /**
@@ -263,6 +284,3 @@ public class CacheUtil {
         return t;
     }
 }
-
-
-

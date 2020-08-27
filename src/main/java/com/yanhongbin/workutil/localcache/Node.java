@@ -137,11 +137,15 @@ public class Node<T> implements Comparable<Node>{
         if (r > Integer.MAX_VALUE) {
             return 1;
         }
+        if (r < Integer.MIN_VALUE) {
+            return -1;
+        }
         return (int)r;
     }
 
-
     public static void main(String[] args) {
         System.out.println(Integer.MAX_VALUE);
+        System.out.println(Integer.MIN_VALUE);
     }
+
 }

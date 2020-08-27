@@ -16,7 +16,7 @@
         <spring.version>5.2.1.RELEASE</spring.version>
         <servlet-api.version>2.5</servlet-api.version>
     </properties>
-    <!--String url = "jdbc:mysql://zuibangai.mysql.rds.aliyuncs.com/doll?useUnicode=true&characterEncoding=utf8&autoReconnect=true&rewriteBatchedStatements=TRUE"; -->
+    <!--String url = "jdbc:mysql://zuibangai.mysql.rds.aliyuncs.com/doll?useUnicode=true&characterEncoding=utf8&autoReconnect=true&rewriteBatchedStatements=TRUE&zeroDateTimeBehavior=convertToNull"; -->
     <!--String username = "tvd0mqlfpx908ISq5+fruQ==";-->
     <!--String password = "mewpqjbS4rb0RTbAYFbVaCdOXOU0mTgG";-->
     <dependencies>
