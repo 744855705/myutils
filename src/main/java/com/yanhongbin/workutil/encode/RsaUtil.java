@@ -1,7 +1,7 @@
 package com.yanhongbin.workutil.encode;
 
-import com.sun.tools.javac.util.ArrayUtils;
 import com.yanhongbin.workutil.encode.common.RsaKeyPair;
+import org.apache.commons.lang3.ArrayUtils;
 
 import javax.crypto.Cipher;
 import java.nio.charset.StandardCharsets;
@@ -50,8 +50,8 @@ public class RsaUtil {
         byte[] enBytes = null;
         for (int i = 0; i < data.length; i += MAX_ENCRYPT_BLOCK) {
             // 注意要使用2的倍数，否则会出现加密后的内容再解密时为乱码
-            byte[] doFinal = cipher.doFinal(subarray(data, i, i + MAX_ENCRYPT_BLOCK));
-            enBytes = addAll(enBytes, doFinal);
+            byte[] doFinal = cipher.doFinal(ArrayUtils.subarray(data, i, i + MAX_ENCRYPT_BLOCK));
+            enBytes = ArrayUtils.addAll(enBytes, doFinal);
         }
         return Base64Util.encodeToString(enBytes);
     }
@@ -76,22 +76,24 @@ public class RsaUtil {
         // 解密时超过字节报错。为此采用分段解密的办法来解密
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < data.length; i += MAX_DECRYPT_BLOCK) {
-            byte[] doFinal = cipher.doFinal(subarray(data, i, i + MAX_DECRYPT_BLOCK));
+            byte[] doFinal = cipher.doFinal(ArrayUtils.subarray(data, i, i + MAX_DECRYPT_BLOCK));
             sb.append(new String(doFinal));
         }
 
         return sb.toString();
     }
 
-    public static RsaKeyPair genKeyPair() throws NoSuchAlgorithmException {
+    public static RsaKeyPair genKeyPair(int keySize) throws NoSuchAlgorithmException {
         // KeyPairGenerator类用于生成公钥和私钥对，基于RSA算法生成对象
         KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
-        // 初始化密钥对生成器，密钥大小为96-1024位
-        keyPairGen.initialize(1024,new SecureRandom());
+        // 初始化密钥对生成器
+        keyPairGen.initialize(keySize,new SecureRandom());
         // 生成一个密钥对，保存在keyPair中
         KeyPair keyPair = keyPairGen.generateKeyPair();
-        RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();   // 得到私钥
-        RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();  // 得到公钥
+        // 得到私钥
+        RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
+        // 得到公钥
+        RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
         String publicKeyString = new String(Base64Util.encode(publicKey.getEncoded()));
         // 得到私钥字符串
         String privateKeyString = new String(Base64Util.encode((privateKey.getEncoded())));
@@ -100,41 +102,5 @@ public class RsaUtil {
     }
 
 
-    public static byte[] subarray(byte[] array, int startIndexInclusive, int endIndexExclusive) {
-        if (array == null) {
-            return null;
-        } else {
-            if (startIndexInclusive < 0) {
-                startIndexInclusive = 0;
-            }
-            if (endIndexExclusive > array.length) {
-                endIndexExclusive = array.length;
-            }
-            int newSize = endIndexExclusive - startIndexInclusive;
-            if (newSize <= 0) {
-                return new byte[0];
-            } else {
-                byte[] subarray = new byte[newSize];
-                System.arraycopy(array, startIndexInclusive, subarray, 0, newSize);
-                return subarray;
-            }
-        }
-    }
 
-    public static byte[] addAll(byte[] array1, byte... array2) {
-        if (array1 == null) {
-            return clone(array2);
-        } else if (array2 == null) {
-            return clone(array1);
-        } else {
-            byte[] joinedArray = new byte[array1.length + array2.length];
-            System.arraycopy(array1, 0, joinedArray, 0, array1.length);
-            System.arraycopy(array2, 0, joinedArray, array1.length, array2.length);
-            return joinedArray;
-        }
-    }
-
-    public static byte[] clone(byte[] array) {
-        return array == null ? null : (byte[])array.clone();
-    }
 }
