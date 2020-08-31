@@ -97,10 +97,7 @@ public class RsaUtil {
         String publicKeyString = new String(Base64Util.encode(publicKey.getEncoded()));
         // 得到私钥字符串
         String privateKeyString = new String(Base64Util.encode((privateKey.getEncoded())));
-        // 将公钥和私钥保存到Map
         return new RsaKeyPair(privateKeyString, publicKeyString);
     }
-
-
 
 }
