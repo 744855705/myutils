@@ -204,7 +204,7 @@ public class ExcelUtil {
      */
     public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue, String[] properties, ExcelType type, AbstractCellStyleFactory abstractCellStyleFactory, String fileName) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
         createWorkbook(queue, clazz, properties, type, abstractCellStyleFactory)
-                .write(getOutPutStream(clazz, fileName));
+                .write(getOutPutStream(clazz, fileName, type));
     }
 
     /**
