@@ -157,7 +157,6 @@ public class ExcelUtil {
      *
      * @param clazz                    类型
      * @param queue                    实体list
-     * @param abstractCellStyleFactory 单元格格式工厂
      * @param <T>                      声明的类型
      */
     public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue, String[] properties) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
@@ -538,7 +537,8 @@ public class ExcelUtil {
      * @param <T>        声明的类型
      * @return Workbook
      */
-    public static <T> Workbook createWorkbook(Queue<T> queue, Class<T> clazz, String[] properties,ExcelType type, AbstractCellStyleFactory abstractCellStyleFactory) throws HeaderNotFindException {
+    public static <T> Workbook createWorkbook(Queue<T> queue, Class<T> clazz, String[] properties, ExcelType type, AbstractCellStyleFactory abstractCellStyleFactory) throws HeaderNotFindException {
+        Queue<T> data = new LinkedList<>(queue);
         Workbook workbook = createWorkbookByName(type);
         if (abstractCellStyleFactory == null) {
             // 如果没有定义格式工厂,使用默认工厂
@@ -547,9 +547,9 @@ public class ExcelUtil {
         // 将要设置格式的单元格对象传入
         abstractCellStyleFactory.setWorkbook(workbook);
         // 页码数
-        double sheetNo = Math.ceil(queue.size() / SHEET_SIZE) + 1;
+        double sheetNo = Math.ceil(data.size() / SHEET_SIZE) + 1;
         for (int i = 0; i < sheetNo; i++) {
-            createSheet(queue, workbook, clazz, properties, abstractCellStyleFactory);
+            createSheet(data, workbook, clazz, properties, abstractCellStyleFactory);
             workbook.setSheetName(i, "第" + (i + 1) + "页");
         }
         return workbook;
