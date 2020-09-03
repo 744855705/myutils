@@ -5,6 +5,7 @@ import com.yanhongbin.workutil.excel.annotation.ExcelDictionary;
 import com.yanhongbin.workutil.excel.annotation.FileName;
 import com.yanhongbin.workutil.excel.cell.DefaultAbstractCellStyleFactory;
 import com.yanhongbin.workutil.excel.cell.factoryinterface.AbstractCellStyleFactory;
+import com.yanhongbin.workutil.excel.enumerate.ExcelType;
 import com.yanhongbin.workutil.excel.exception.AnnotationNotFoundException;
 import com.yanhongbin.workutil.excel.exception.ExcelDictionaryMatchException;
 import com.yanhongbin.workutil.excel.exception.HeaderNotFindException;
@@ -15,6 +16,7 @@ import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import com.yanhongbin.workutil.excel.enumerate.CellType;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -123,6 +125,10 @@ public class ExcelUtil {
         );
     }
 
+    public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
+        excelOutPut(clazz, queue, new String[]{}, ExcelType.XLS);
+    }
+
     /**
      * 将对象列表转换为文件,写入response输出流
      *
@@ -130,8 +136,8 @@ public class ExcelUtil {
      * @param queue 实体list
      * @param <T>   声明的类型
      */
-    public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
-        excelOutPut(clazz, queue, new String[]{}, null);
+    public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue, ExcelType type) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
+        excelOutPut(clazz, queue, new String[]{}, type, null);
     }
 
     /**
@@ -142,10 +148,21 @@ public class ExcelUtil {
      * @param abstractCellStyleFactory 单元格格式工厂
      * @param <T>                      声明的类型
      */
-    public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue, AbstractCellStyleFactory abstractCellStyleFactory) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
-        excelOutPut(clazz, queue, new String[]{}, abstractCellStyleFactory);
+    public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue, ExcelType type, AbstractCellStyleFactory abstractCellStyleFactory) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
+        excelOutPut(clazz, queue, new String[]{}, type, abstractCellStyleFactory);
     }
 
+    /**
+     * 将对象列表转换为文件,写入response输出流
+     *
+     * @param clazz                    类型
+     * @param queue                    实体list
+     * @param abstractCellStyleFactory 单元格格式工厂
+     * @param <T>                      声明的类型
+     */
+    public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue, String[] properties) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
+        excelOutPut(clazz, queue, properties, ExcelType.XLS);
+    }
 
     /**
      * 按照传入的表头将对象列表转换为文件,写入response输出流
@@ -154,10 +171,10 @@ public class ExcelUtil {
      * @param queue      实体list
      * @param properties 表头
      * @param <T>        声明的类型
-     * @see ExcelUtil#createWorkbook(Queue, Class, String[], AbstractCellStyleFactory)
+     * @see ExcelUtil#createWorkbook(Queue, Class, String[], ExcelType, AbstractCellStyleFactory)
      */
-    public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue, String[] properties) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
-        excelOutPut(clazz, queue, properties, null);
+    public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue, String[] properties, ExcelType type) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
+        excelOutPut(clazz, queue, properties, type, null);
     }
 
     /**
@@ -168,10 +185,10 @@ public class ExcelUtil {
      * @param properties               表头
      * @param abstractCellStyleFactory 单元格格式工厂
      * @param <T>                      声明的类型
-     * @see ExcelUtil#createWorkbook(Queue, Class, String[], AbstractCellStyleFactory)
+     * @see ExcelUtil#createWorkbook(Queue, Class, String[], ExcelType, AbstractCellStyleFactory)
      */
-    public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue, String[] properties, AbstractCellStyleFactory abstractCellStyleFactory) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
-        excelOutPut(clazz, queue, properties, abstractCellStyleFactory, null);
+    public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue, String[] properties, ExcelType type, AbstractCellStyleFactory abstractCellStyleFactory) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
+        excelOutPut(clazz, queue, properties, type, abstractCellStyleFactory, null);
     }
 
     /**
@@ -183,10 +200,10 @@ public class ExcelUtil {
      * @param abstractCellStyleFactory 单元格格式工厂
      * @param <T>                      声明的类型
      * @param fileName                 指定文件名
-     * @see ExcelUtil#createWorkbook(Queue, Class, String[], AbstractCellStyleFactory)
+     * @see ExcelUtil#createWorkbook(Queue, Class, String[], ExcelType, AbstractCellStyleFactory)
      */
-    public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue, String[] properties, AbstractCellStyleFactory abstractCellStyleFactory, String fileName) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
-        createWorkbook(queue, clazz, properties, abstractCellStyleFactory)
+    public static <T> void excelOutPut(Class<T> clazz, Queue<T> queue, String[] properties, ExcelType type, AbstractCellStyleFactory abstractCellStyleFactory, String fileName) throws HeaderNotFindException, IOException, AnnotationNotFoundException {
+        createWorkbook(queue, clazz, properties, type, abstractCellStyleFactory)
                 .write(getOutPutStream(clazz, fileName));
     }
 
@@ -199,8 +216,8 @@ public class ExcelUtil {
      * @throws AnnotationNotFoundException
      */
     @SuppressWarnings("all")
-    private static OutputStream getOutPutStream(Class<?> clazz, String fileName) throws IOException, AnnotationNotFoundException {
-        fileName = getFileName(clazz, fileName);
+    private static OutputStream getOutPutStream(Class<?> clazz, String fileName, ExcelType type) throws IOException, AnnotationNotFoundException {
+        fileName = getFileName(clazz, fileName, type);
         HttpServletRequest request = RequestUtil.getRequest();
         HttpServletResponse response = ResponseUtil.getResponse();
         final String userAgent = request.getHeader("user-agent");
@@ -228,7 +245,7 @@ public class ExcelUtil {
      * @return
      */
     @SuppressWarnings("all")
-    private static String getFileName(Class<?> clazz,String fileName) throws AnnotationNotFoundException {
+    private static String getFileName(Class<?> clazz, String fileName, ExcelType type) throws AnnotationNotFoundException {
         if (StringUtils.isEmpty(fileName)) {
             FileName fileNameAnnotation = clazz.getAnnotation(FileName.class);
             if (fileNameAnnotation == null) {
@@ -241,9 +258,9 @@ public class ExcelUtil {
                             (new Date()).toInstant(), zoneId
                     )
             );
-            return fileName + format + ".xls";
+            return fileName + format + type.getSuffix();
         } else {
-            return fileName.endsWith(".xls") ? fileName : fileName + ".xls";
+            return fileName.endsWith(type.getSuffix()) ? fileName : fileName + type.getSuffix();
         }
     }
 
@@ -521,8 +538,8 @@ public class ExcelUtil {
      * @param <T>        声明的类型
      * @return Workbook
      */
-    public static <T> Workbook createWorkbook(Queue<T> queue, Class<T> clazz, String[] properties, AbstractCellStyleFactory abstractCellStyleFactory) throws HeaderNotFindException {
-        HSSFWorkbook workbook = new HSSFWorkbook();
+    public static <T> Workbook createWorkbook(Queue<T> queue, Class<T> clazz, String[] properties,ExcelType type, AbstractCellStyleFactory abstractCellStyleFactory) throws HeaderNotFindException {
+        Workbook workbook = createWorkbookByName(type);
         if (abstractCellStyleFactory == null) {
             // 如果没有定义格式工厂,使用默认工厂
             abstractCellStyleFactory = new DefaultAbstractCellStyleFactory();
@@ -536,6 +553,17 @@ public class ExcelUtil {
             workbook.setSheetName(i, "第" + (i + 1) + "页");
         }
         return workbook;
+    }
+
+    private static Workbook createWorkbookByName(ExcelType type) {
+        switch (type) {
+            case XLSX:
+                return new XSSFWorkbook();
+            case NONE:
+            case XLS:
+            default:
+                return new HSSFWorkbook();
+        }
     }
 
     /**
