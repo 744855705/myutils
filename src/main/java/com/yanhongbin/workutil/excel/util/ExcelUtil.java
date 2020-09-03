@@ -43,7 +43,7 @@ import java.util.*;
  */
 public class ExcelUtil {
 
-    private static Logger log = LoggerFactory.getLogger(ExcelUtil.class);
+    private static final Logger log = LoggerFactory.getLogger(ExcelUtil.class);
 
     /**
      * 一页最大行数 65535
@@ -53,17 +53,17 @@ public class ExcelUtil {
     /**
      * 火狐
      */
-    private static String FIREFOX = "Firefox";
+    private static final String FIREFOX = "Firefox";
 
     /**
      * 谷歌
      */
-    private static String CHROME = "Chrome";
+    private static final String CHROME = "Chrome";
 
     /**
      * apple
      */
-    private static String SAFARI = "Safari";
+    private static final String SAFARI = "Safari";
 
     /**
      * 文件名时间格式化 pattern
@@ -88,7 +88,7 @@ public class ExcelUtil {
     /**
      * 默认时区
      */
-    private static ZoneId zoneId = ZoneId.systemDefault();
+    private static final ZoneId zoneId = ZoneId.systemDefault();
 
     /**
      * 设置导出的Excel时间格式化 pattern
