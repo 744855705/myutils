@@ -12,7 +12,6 @@ import com.yanhongbin.workutil.excel.exception.HeaderNotFindException;
 import com.yanhongbin.workutil.web.util.RequestUtil;
 import com.yanhongbin.workutil.web.util.ResponseUtil;
 import org.apache.poi.EncryptedDocumentException;
-import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -581,8 +580,7 @@ public class ExcelUtil {
         }
         // 避开表头,循环生成Row
         for (int i = 1; i <= sheetSize; i++) {
-            Row iRow = sheet.createRow(i);
-            createCell(cellStyleFactory, queue, iRow, fieldList);
+            createCell(cellStyleFactory, queue, sheet.createRow(i), fieldList);
         }
         int size = fieldList.size();
         for (int i = 0; i < size; i++) {
@@ -652,7 +650,7 @@ public class ExcelUtil {
                 cell.setBlank();
                 break;
             case FORMULA:
-                cell.setCellValue(new HSSFRichTextString(String.valueOf(value)));
+                cell.setCellValue(String.valueOf(value));
                 break;
             case BOOLEAN:
                 cell.setCellValue(Boolean.getBoolean(String.valueOf(value)));
