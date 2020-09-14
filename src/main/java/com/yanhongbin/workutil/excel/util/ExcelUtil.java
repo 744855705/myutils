@@ -50,7 +50,7 @@ public class ExcelUtil {
     /**
      * 一页最大行数 65535
      */
-    private static Integer SHEET_SIZE = (2 << 15) - 1;
+    private static final Integer SHEET_SIZE = (2 << 15) - 1;
 
     /**
      * 火狐
@@ -71,6 +71,7 @@ public class ExcelUtil {
      * 文件名时间格式化 pattern
      */
     private static String FILENAME_PATTERN = "yyyy年MM月dd日 HH时mm分";
+
     /**
      * 文件名时间格式化 DateTimeFormatter
      */
@@ -328,7 +329,7 @@ public class ExcelUtil {
         List<T> entityList = new ArrayList<>();
         // 获取表头
         Row firstRow = sheet.getRow(0);
-        int rowNum = firstRow.getRowNum();
+        int rowNum = firstRow.getPhysicalNumberOfCells();
         String[] properties = new String[rowNum];
         for (int i = 0; i < rowNum; i++) {
             Cell cell = firstRow.getCell(i);
@@ -392,7 +393,7 @@ public class ExcelUtil {
     private static Object getCellValue(Cell cell, Field field) throws ExcelDictionaryMatchException {
         Class<?> fieldType = field.getType();
         // 获取Cell类型(支持字典自动设置为String)
-        com.yanhongbin.workutil.excel.enumerate.CellType type = processExcelDictionaryCelltype(field);
+        com.yanhongbin.workutil.excel.enumerate.CellType type = processExcelDictionaryCellType(field);
         Object value;
         switch (type) {
             case STRING:
@@ -635,7 +636,7 @@ public class ExcelUtil {
      */
     @SuppressWarnings("all")
     private static void setCellValueByType(Field field, Cell cell, Object object) throws Exception {
-        CellType type = processExcelDictionaryCelltype(field);
+        CellType type = processExcelDictionaryCellType(field);
         Object value = processExcelDictionaryKey(field, object);
         if (value == null) {
             cell.setBlank();
@@ -689,7 +690,7 @@ public class ExcelUtil {
      * @param field 字段
      * @return CellType
      */
-    private static CellType processExcelDictionaryCelltype(Field field) {
+    private static CellType processExcelDictionaryCellType(Field field) {
         ExcelDictionary excelDictionary = field.getAnnotation(ExcelDictionary.class);
         Class<?> type = field.getType();
         if (type == Date.class) {

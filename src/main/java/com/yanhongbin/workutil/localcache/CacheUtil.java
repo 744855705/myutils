@@ -29,7 +29,7 @@ public class CacheUtil {
     /**
      * 使用ConcurrentHashMap作为缓存，put 线程安全
      */
-    private static final ConcurrentHashMap<String, Node> cache = new ConcurrentHashMap<String, Node>(1 << 3);
+    private static final ConcurrentHashMap<String, Node> CACHE = new ConcurrentHashMap<String, Node>(1 << 3);
 
     /**
      * 操作 expireQueue 时需上锁
@@ -40,7 +40,7 @@ public class CacheUtil {
      * 用来计算缓存过期的工具队列，线程不安全
      */
     @SuppressWarnings("rawtypes")
-    private static final PriorityQueue<Node> expireQueue = new PriorityQueue<Node>(2<<10);
+    private static final PriorityQueue<Node> EXPIRE_QUEUE = new PriorityQueue<Node>(2<<10);
 
     static {
         ScheduledExecutorProxy.scheduleWithFixedDelayFiveSeconds(new RemoveOverTimeNode());
@@ -68,12 +68,12 @@ public class CacheUtil {
      */
     public static <T> void put(String key, T value, long expire) {
         Node<T> newNode = expire == -1L ? new Node<T>(key, value) : new Node<T>(key, value, expire);
-        Node oldNode = cache.put(key, newNode);
+        Node oldNode = CACHE.put(key, newNode);
         LOCK.lock();
         try {
-            expireQueue.add(newNode);
+            EXPIRE_QUEUE.add(newNode);
             if (oldNode != null) {
-                expireQueue.remove(oldNode);
+                EXPIRE_QUEUE.remove(oldNode);
             }
         } finally {
             LOCK.unlock();
@@ -86,7 +86,7 @@ public class CacheUtil {
      * @param key key
      */
     public static void refreshExpireTime(String key) {
-        Node node = cache.get(key);
+        Node node = CACHE.get(key);
         if (node == null) {
             return;
         }
@@ -100,7 +100,7 @@ public class CacheUtil {
      * @param expire expire 秒后过期
      */
     public static void refreshExpireTime(String key, long expire) {
-        Node node = cache.get(key);
+        Node node = CACHE.get(key);
         if (node == null) {
             return;
         }
@@ -116,7 +116,7 @@ public class CacheUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T> T get(String key) {
-        Node<T> node = cache.get(key);
+        Node<T> node = CACHE.get(key);
         return node != null && node.checkAndRemoveOverTime() ? node.getValue() : null;
     }
 
@@ -128,8 +128,8 @@ public class CacheUtil {
     public static void delete(String key) {
         LOCK.lock();
         try {
-            Node remove = cache.remove(key);
-            expireQueue.remove(remove);
+            Node remove = CACHE.remove(key);
+            EXPIRE_QUEUE.remove(remove);
         } finally {
             LOCK.unlock();
         }
@@ -142,8 +142,8 @@ public class CacheUtil {
         LOCK.lock();
         try {
             log.info("清空缓存");
-            cache.clear();
-            expireQueue.clear();
+            CACHE.clear();
+            EXPIRE_QUEUE.clear();
         } finally {
             LOCK.unlock();
         }
@@ -171,15 +171,15 @@ public class CacheUtil {
         LOCK.lock();
         try {
             while (true) {
-                Node peek = expireQueue.peek();
+                Node peek = EXPIRE_QUEUE.peek();
                 if (peek == null) {
                     return;
                 }
                 boolean check = peek.check();
                 if (!check) {
                     // 已过期
-                    cache.remove(peek.getKey());
-                    expireQueue.poll();
+                    CACHE.remove(peek.getKey());
+                    EXPIRE_QUEUE.poll();
                 } else {
                     return;
                 }

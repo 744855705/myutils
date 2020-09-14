@@ -58,10 +58,10 @@ public class SecurityUtils {
     }
 
     public static String sha1Encode(String inStr) {
-        return SecurityUtils.encrypt(inStr, "SHA-1");
+        return SecurityUtils.encrypt(inStr, SecurityType.SHA_1.getName());
     }
 
     public static String md5Encode(String inStr) {
-        return SecurityUtils.encrypt(inStr, "MD5");
+        return SecurityUtils.encrypt(inStr, SecurityType.MD5.getName());
     }
 }

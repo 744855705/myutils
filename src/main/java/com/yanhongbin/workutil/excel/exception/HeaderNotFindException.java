@@ -9,6 +9,9 @@ package com.yanhongbin.workutil.excel.exception;
  */
 public class HeaderNotFindException extends Exception {
 
+    public HeaderNotFindException(){
+        super();
+    }
     public HeaderNotFindException(String message) {
         super(message);
     }

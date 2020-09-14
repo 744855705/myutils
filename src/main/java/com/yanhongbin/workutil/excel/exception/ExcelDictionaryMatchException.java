@@ -9,6 +9,10 @@ package com.yanhongbin.workutil.excel.exception;
  */
 public class ExcelDictionaryMatchException extends Exception{
 
+    public ExcelDictionaryMatchException(){
+        super();
+    }
+
     public ExcelDictionaryMatchException(String message){
         super(message);
     }
