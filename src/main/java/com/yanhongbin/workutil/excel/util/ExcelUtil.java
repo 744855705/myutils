@@ -14,7 +14,6 @@ import com.yanhongbin.workutil.web.util.ResponseUtil;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import com.yanhongbin.workutil.excel.enumerate.CellType;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
@@ -393,7 +392,7 @@ public class ExcelUtil {
     private static Object getCellValue(Cell cell, Field field) throws ExcelDictionaryMatchException {
         Class<?> fieldType = field.getType();
         // 获取Cell类型(支持字典自动设置为String)
-        com.yanhongbin.workutil.excel.enumerate.CellType type = processExcelDictionaryCellType(field);
+        CellType type = processExcelDictionaryCellType(field);
         Object value;
         switch (type) {
             case STRING:
@@ -699,7 +698,6 @@ public class ExcelUtil {
         if (excelDictionary != null) {
             return CellType.STRING;
         } else {
-
             return field.getAnnotation(Excel.class).type();
         }
     }

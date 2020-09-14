@@ -1,6 +1,6 @@
 package com.yanhongbin.workutil.excel.annotation;
 
-import com.yanhongbin.workutil.excel.enumerate.CellType;
+import org.apache.poi.ss.usermodel.CellType;
 
 import java.lang.annotation.*;
 
