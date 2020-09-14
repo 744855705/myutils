@@ -648,9 +648,9 @@ public class ExcelUtil {
                 if (field.getType() == Date.class) {
                     // 改用 DateTimeFormatter 格式化时间
                     value = DATE_TIME_FORMATTER.format(
-                            LocalDateTime.ofInstant(
-                                    ((Date) value).toInstant(), ZONE_ID
-                            )
+                        LocalDateTime.ofInstant(
+                                ((Date) value).toInstant(), ZONE_ID
+                        )
                     );
                 }
                 cell.setCellType(org.apache.poi.ss.usermodel.CellType.STRING);
