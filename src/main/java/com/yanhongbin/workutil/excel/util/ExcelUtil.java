@@ -75,7 +75,7 @@ public class ExcelUtil {
     /**
      * 文件名时间格式化 DateTimeFormatter
      */
-    private static DateTimeFormatter filenameFormatter = DateTimeFormatter.ofPattern(FILENAME_PATTERN);
+    private static DateTimeFormatter FILENAME_FORMATTER = DateTimeFormatter.ofPattern(FILENAME_PATTERN);
 
     /**
      * excel中时间格式化 pattern
@@ -86,12 +86,12 @@ public class ExcelUtil {
     /**
      * 导出excel中时间格式化 DateTimeFormatter
      */
-    private static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
+    private static DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
 
     /**
      * 默认时区
      */
-    private static final ZoneId zoneId = ZoneId.systemDefault();
+    private static final ZoneId ZONE_ID = ZoneId.systemDefault();
 
     /**
      * 设置导出的Excel时间格式化 pattern
@@ -99,7 +99,7 @@ public class ExcelUtil {
      */
     public static void setDateFormatPattern(String dateFormatPattern) {
         DATE_FORMAT_PATTERN = dateFormatPattern;
-        dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
+        DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
     }
 
     /**
@@ -108,7 +108,7 @@ public class ExcelUtil {
      */
     public static void setFilenamePattern(String filenamePattern) {
         FILENAME_PATTERN = filenamePattern;
-        filenameFormatter = DateTimeFormatter.ofPattern(FILENAME_PATTERN);
+        FILENAME_FORMATTER = DateTimeFormatter.ofPattern(FILENAME_PATTERN);
     }
 
     /**
@@ -253,9 +253,9 @@ public class ExcelUtil {
             } else {
                 fileName = fileNameAnnotation.value();
             }
-            String format = filenameFormatter.format(
+            String format = FILENAME_FORMATTER.format(
                     LocalDateTime.ofInstant(
-                            (new Date()).toInstant(), zoneId
+                            (new Date()).toInstant(), ZONE_ID
                     )
             );
             return fileName + format + type.getSuffix();
@@ -647,9 +647,9 @@ public class ExcelUtil {
                 // 处理时间类型Date
                 if (field.getType() == Date.class) {
                     // 改用 DateTimeFormatter 格式化时间
-                    value = dateTimeFormatter.format(
+                    value = DATE_TIME_FORMATTER.format(
                             LocalDateTime.ofInstant(
-                                    ((Date) value).toInstant(),  zoneId
+                                    ((Date) value).toInstant(), ZONE_ID
                             )
                     );
                 }
