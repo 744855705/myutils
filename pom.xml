@@ -15,6 +15,9 @@
         <slf4j.version>1.7.29</slf4j.version>
         <spring.version>5.2.1.RELEASE</spring.version>
         <servlet-api.version>2.5</servlet-api.version>
+        <commons-lang3.version>3.9</commons-lang3.version>
+        <fastjson.version>1.2.68</fastjson.version>
+        <httpcomponents.version>4.5</httpcomponents.version>
     </properties>
     <!--String url = "jdbc:mysql://zuibangai.mysql.rds.aliyuncs.com/doll?useUnicode=true&characterEncoding=utf8&autoReconnect=true&rewriteBatchedStatements=TRUE&zeroDateTimeBehavior=convertToNull"; -->
     <!--String username = "tvd0mqlfpx908ISq5+fruQ==";-->
@@ -53,8 +56,33 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.9</version>
+            <version>${commons-lang3.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>${fastjson.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${httpcomponents.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>fluent-hc</artifactId>
+            <version>${httpcomponents.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.coobird</groupId>
+            <artifactId>thumbnailator</artifactId>
+            <version>0.4.12</version>
+        </dependency>
+
 
     </dependencies>
 
@@ -66,8 +94,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.6.1</version><!--$NO-MVN-MAN-VER$ -->
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <source>9</source>
+                    <target>9</target>
                     <encoding>UTF-8</encoding><!-- 指定编码格式，否则在DOS下运行mvn compile命令时会出现莫名的错误，因为系统默认使用GBK编码 -->
                 </configuration>
             </plugin>

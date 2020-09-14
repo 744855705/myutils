@@ -1,9 +1,13 @@
 package com.yanhongbin.workutil.encode;
 
+import com.alibaba.fastjson.JSONObject;
 import com.yanhongbin.workutil.encode.common.RsaKeyPair;
+import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.lang3.ArrayUtils;
 
 import javax.crypto.Cipher;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
