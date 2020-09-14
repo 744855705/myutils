@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -40,7 +41,7 @@ public class FieldUtil {
      */
     public static List<Field> getFieldsListWithAnnotation(final Class<?> clazz, final Class<? extends Annotation> annotationClazz) {
         final List<Field> allFields =getAllFields(clazz);
-        final List<Field> annotatedFields = new ArrayList<>();
+        final List<Field> annotatedFields = new LinkedList<>();
         for (final Field field : allFields) {
             if (field.getAnnotation(annotationClazz) != null) {
                 annotatedFields.add(field);
