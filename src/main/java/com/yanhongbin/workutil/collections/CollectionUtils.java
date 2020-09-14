@@ -38,7 +38,7 @@ public class CollectionUtils {
      * @return Set
      */
     public static <M, N> Set<N> transformToSet(Collection<M> source, ITransform<? super M, ? extends N> transform) {
-        return source.stream().map(transform::transform).collect(Collectors.toSet());
+        return source.parallelStream().map(transform::transform).collect(Collectors.toSet());
     }
 
     /**
