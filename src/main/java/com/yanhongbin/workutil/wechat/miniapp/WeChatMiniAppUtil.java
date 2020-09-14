@@ -3,13 +3,9 @@ package com.yanhongbin.workutil.wechat.miniapp;
 import com.alibaba.fastjson.JSONObject;
 
 import com.yanhongbin.workutil.http.HttpFluentUtil;
-import com.yanhongbin.workutil.localcache.CacheUtil;
-import com.yanhongbin.workutil.wechat.common.WeChatAccessToken;
+import com.yanhongbin.workutil.wechat.common.util.WeChatUtil;
 import com.yanhongbin.workutil.wechat.miniapp.enumerate.Language;
 import com.yanhongbin.workutil.wechat.miniapp.enumerate.MiniProgramState;
-import com.yanhongbin.workutil.wechat.miniapp.enumerate.WeChatConfig;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,49 +21,18 @@ public class WeChatMiniAppUtil {
 
     private static final Logger log = LoggerFactory.getLogger(WeChatMiniAppUtil.class);
 
-    /**
-     * 微信小程序access_token 存储缓存中的key
-     */
-    private static final String WE_CHAT_MINI_APP_ACCESS_TOKEN_CACHE_KEY = "WE_CHAT_MINI_APP_ACCESS_TOKEN_CACHE_KEY";
-
 
     /**
      * 从微信获取 access_token
      *
      * @return WeChatMiniAppAccessToken
      */
-    static private WeChatAccessToken getAccessToken(String appId, String secret) {
-        String url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s";
-        String formatUrl = String.format(url, appId, secret);
-        return new WeChatAccessToken(JSONObject.parseObject(HttpFluentUtil.doGet(formatUrl)));
+    static private String getAccessToken(String appId, String secret) {
+        return WeChatUtil.getAccessTokenInCache(appId, secret);
     }
-
-    /**
-     * 缓存中获取access_token ,如果缓存中没有,从微信获取,并且刷新缓存
-     *
-     * @return access_token
-     */
-    static public String getAccessTokenInCache() {
-        String accessTokenInCache = CacheUtil.get(WE_CHAT_MINI_APP_ACCESS_TOKEN_CACHE_KEY);
-        if (StringUtils.isEmpty(accessTokenInCache)) {
-            synchronized (WeChatMiniAppUtil.class) {
-                // 二次校验,防止多个线程请求微信平添获取access_token
-                String accessTokenInCacheSecond = CacheUtil.get(WE_CHAT_MINI_APP_ACCESS_TOKEN_CACHE_KEY);
-                if (StringUtils.isEmpty(accessTokenInCacheSecond)) {
-                    // 缓存中没有access_token,从微信平台重新获取
-                    WeChatAccessToken accessToken = getAccessToken(WeChatConfig.MINI_APP.getAppId(), WeChatConfig.MINI_APP.getSecret());
-                    // 放入缓存,过期时间设置为比微信少10秒,防止微信已过期但是缓存中未过期的情况
-                    CacheUtil.put(WE_CHAT_MINI_APP_ACCESS_TOKEN_CACHE_KEY, accessToken.getAccessToken(), accessToken.getExpiresIn() - 10);
-                    return accessToken.getAccessToken();
-                }
-                // 已经有其他的线程刷新了缓存,直接返回
-                return accessTokenInCacheSecond;
-            }
-        }
-        // 缓存中的accessToken没有过期,直接返回
-        return accessTokenInCache;
+    static private String getAccessToken(MiniAppConfig miniAppConfig) {
+        return WeChatUtil.getAccessTokenInCache(miniAppConfig.getAppId(), miniAppConfig.getSecret());
     }
-
 
     /**
      * 推送小程序订阅消息
@@ -114,26 +79,26 @@ public class WeChatMiniAppUtil {
      *
      * @see WeChatMiniAppUtil#pushMessage(String, String, String, String, TemplateMessageData, MiniProgramState, Language)
      */
-    static public void pushMessage(String openId, String templateId, String page, TemplateMessageData data, MiniProgramState state, Language language) {
-        pushMessage(getAccessTokenInCache(), openId, templateId, page, data, state, language);
+    static public void pushMessage(MiniAppConfig miniAppConfig, String openId, String templateId, String page, TemplateMessageData data, MiniProgramState state, Language language) {
+        pushMessage(getAccessToken(miniAppConfig), openId, templateId, page, data, state, language);
     }
 
     /**
      * 不需要传入accessToken,使用正式环境,默认语言的推送方法
      *
-     * @see WeChatMiniAppUtil#pushMessage(String, String, String, TemplateMessageData, MiniProgramState, Language)
+     * @see WeChatMiniAppUtil#pushMessage(MiniAppConfig, String, String, String, TemplateMessageData, MiniProgramState, Language)
      */
-    static public void pushMessage(String openId, String templateId, String page, TemplateMessageData data) {
-        pushMessage(openId, templateId, page, data, null, null);
+    static public void pushMessage(MiniAppConfig miniAppConfig, String openId, String templateId, String page, TemplateMessageData data) {
+        pushMessage(miniAppConfig, openId, templateId, page, data, null, null);
     }
 
     /**
      * 不需要传入accessToken,使用正式环境,默认语言,无页面跳转的推送方法
      *
-     * @see WeChatMiniAppUtil#pushMessage(String, String, String, TemplateMessageData)
+     * @see WeChatMiniAppUtil#pushMessage(MiniAppConfig, String, String, String, TemplateMessageData)
      */
-    static public void pushMessage(String openId, String templateId, TemplateMessageData data) {
-        pushMessage(openId, templateId, null, data);
+    static public void pushMessage(MiniAppConfig miniAppConfig, String openId, String templateId, TemplateMessageData data) {
+        pushMessage(miniAppConfig, openId, templateId, null, data);
     }
 
 }
