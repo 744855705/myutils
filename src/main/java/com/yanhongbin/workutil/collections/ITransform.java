@@ -10,6 +10,7 @@ package com.yanhongbin.workutil.collections;
 public interface ITransform<M, N> {
     /**
      * 类型转换
+     *
      * @param n 要被转换的类型
      * @return 转换后
      */

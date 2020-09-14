@@ -55,7 +55,7 @@ public class CollectionUtils {
     }
 
     /**
-     * 多线程处理数组循环
+     * 多线程处理数组循环，不支持顺序处理
      *
      * @param array  array
      * @param action 循环操作方法
@@ -66,7 +66,7 @@ public class CollectionUtils {
     }
 
     /**
-     * 多线程处理 Collection 循环
+     * 多线程处理 Collection 循环,不支持顺序处理
      *
      * @param collection collection
      * @param action     循环操作方法
