@@ -1,13 +1,7 @@
 package com.yanhongbin.workutil.collections;
 
 
-
-
-import org.apache.poi.ss.formula.functions.T;
-
 import java.lang.reflect.Array;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
