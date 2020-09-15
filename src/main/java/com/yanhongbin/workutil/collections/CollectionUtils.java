@@ -111,11 +111,4 @@ public class CollectionUtils {
         return collection.toArray((T[])Array.newInstance(clazz,collection.size()));
     }
 
-    public static void main(String[] args) {
-        String[] strings = toArray(new LinkedList<>(Arrays.asList("1", "2", "3")), String.class);
-        for (String string : strings) {
-            System.out.println(string);
-        }
-    }
-
 }

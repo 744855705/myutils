@@ -28,7 +28,7 @@ public class RsaUtil {
     /**
      * RSA最大加密明文大小
      */
-    private static final int MAX_ENCRYPT_BLOCK = 117;
+    private static final int MAX_ENCRYPT_BLOCK = 1170;
 
     /**
      * RSA最大解密密文大小
