@@ -1,7 +1,9 @@
 package com.yanhongbin.workutil.excel.annotation;
 
+import com.yanhongbin.workutil.collections.CollectionUtils;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,7 +24,7 @@ public class AnnotationFieldModify {
      * @throws IllegalAccessException throws by {@link Field#set}
      */
     @SuppressWarnings("unchecked")
-    public static void modifyAnnotationFieldValue(Annotation annotation, Map map) throws NoSuchFieldException, IllegalAccessException {
+    public static void modifyAnnotationFieldValue(Annotation annotation, Map<String, Object> map) throws NoSuchFieldException, IllegalAccessException {
         // 取出注解的代理对象
         if (annotation == null) {
             // 注解为null 的情况下不做任何操作
@@ -39,14 +41,15 @@ public class AnnotationFieldModify {
 
     /**
      * 根据Class和Field修改{@link ExcelDictionary}注解的字段值
+     *
      * @param clazz clazz
      * @param field fieldName
-     * @param map memberValues
-     * @throws NoSuchFieldException throws by {@link Field#get}
+     * @param map   memberValues
+     * @throws NoSuchFieldException   throws by {@link Field#get}
      * @throws IllegalAccessException throws by {@link Field#set}
      */
-    private static void modifyAnnotationExcelDictionaryMemberValues(Class<?> clazz, String field,Map<String, Object> map) throws NoSuchFieldException, IllegalAccessException {
-        if(clazz == null){
+    private static void modifyAnnotationExcelDictionaryMemberValues(Class<?> clazz, String field, Map<String, Object> map) throws NoSuchFieldException, IllegalAccessException {
+        if (clazz == null) {
             return;
         }
         Field declaredField = clazz.getDeclaredField(field);
@@ -65,13 +68,10 @@ public class AnnotationFieldModify {
      */
     @SuppressWarnings("all")
     public static void modifyAnnotationExcelDictionary(Class<?> clazz, String field,Map<String,String> dictionaryMap) throws NoSuchFieldException, IllegalAccessException {
-        if (dictionaryMap == null) {
+        if (CollectionUtils.isEmpty(dictionaryMap)) {
             return;
         }
         int size = dictionaryMap.size();
-        if (size == 0) {
-            return;
-        }
         final String[] keyArray = new String[size];
         final String[] valueArray = new String[size];
         final int[] index = {0};
@@ -82,7 +82,7 @@ public class AnnotationFieldModify {
         HashMap<String, Object> map = new HashMap<>(2);
         map.put("keyArray",keyArray);
         map.put("valueArray",valueArray);
-        modifyAnnotationExcelDictionaryMemberValues(clazz, field,map);
+        modifyAnnotationExcelDictionaryMemberValues(clazz, field, map);
     }
 
     /**
@@ -101,6 +101,26 @@ public class AnnotationFieldModify {
     public static <T extends Enum> void modifyAnnotationExcelDictionary(Class<?> clazz, String field, Class<T> enumClazz, String keyName, String valueName) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, NoSuchFieldException {
         Map<String, String> enumToMap = enumToMap(enumClazz, keyName, valueName);
         modifyAnnotationExcelDictionary(clazz, field, enumToMap);
+    }
+
+    /**
+     * 根据Class和Field修改{@link ExcelDictionary}注解的字段值,字段值来源为枚举类
+     * @param clazz clazz
+     * @param collection 传入的字典对象
+     * @param field 要修改的字段
+     * @param <N> N extends IDictionary
+     * @throws NoSuchFieldException throws by {@link Field#get}
+     * @throws IllegalAccessException throws by {@link Field#set}
+     */
+    public static <N extends IDictionary,M extends Collection<N>> void modifyAnnotationExcelDictionary(Class<?> clazz,M collection,String field) throws NoSuchFieldException, IllegalAccessException {
+        Map<String, String> iDictionaryMap = iDictionaryToMap(collection);
+        modifyAnnotationExcelDictionary(clazz, field, iDictionaryMap);
+    }
+
+    private static <N extends IDictionary,M extends Collection<N>> Map<String, String> iDictionaryToMap(M collection) {
+        HashMap<String, String> map = new HashMap<>();
+        collection.forEach(n -> map.put(n.getKey(), n.getValue()));
+        return map;
     }
 
     /**
@@ -132,8 +152,8 @@ public class AnnotationFieldModify {
      */
     @SuppressWarnings("all")
     public static String toGetMethodName(String fieldName) {
-        String s = fieldName.substring(0, 1).toUpperCase();
-        return "get" + s + fieldName.substring(1);
+        char c = Character.toUpperCase(fieldName.charAt(0));
+        return new StringBuilder("get").append(c).append(fieldName.substring(1)).toString();
     }
 
 }
