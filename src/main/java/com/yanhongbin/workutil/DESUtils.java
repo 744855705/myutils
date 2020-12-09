@@ -1,6 +1,8 @@
 package com.yanhongbin.workutil;
 
 
+import com.yanhongbin.workutil.encode.Base64Util;
+
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import java.nio.charset.StandardCharsets;
@@ -8,10 +10,10 @@ import java.security.Key;
 import java.security.SecureRandom;
 import java.util.Base64;
 
-@SuppressWarnings("restriction")
+
 public class DESUtils {
 	private static final Key KEY;
-	private static final String KEY_STR = "Zuibon888888";
+	private static final String KEY_STR = "";
 
 	static {
 		try {
@@ -38,7 +40,7 @@ public class DESUtils {
 			Cipher cipher = Cipher.getInstance("DES");
 			cipher.init(Cipher.ENCRYPT_MODE, KEY);
 			byte[] encryptStrBytes = cipher.doFinal(strBytes);
-			return new String(Base64.getEncoder().encode(encryptStrBytes));
+			return new String(Base64Util.encode(encryptStrBytes));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -53,11 +55,11 @@ public class DESUtils {
 	 */
 	public static String getDecryptString(String str) {
 		try {
-            byte[] strBytes = Base64.getDecoder().decode(str);
+            byte[] strBytes = Base64Util.decode(str);
 			Cipher cipher = Cipher.getInstance("DES");
 			cipher.init(Cipher.DECRYPT_MODE, KEY);
 			byte[] encryptStrBytes = cipher.doFinal(strBytes);
-			return new String(encryptStrBytes, "UTF-8");
+			return new String(encryptStrBytes, StandardCharsets.UTF_8);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

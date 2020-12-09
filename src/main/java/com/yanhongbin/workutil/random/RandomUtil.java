@@ -1,8 +1,8 @@
 package com.yanhongbin.workutil.random;
 
+import com.yanhongbin.workutil.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 
