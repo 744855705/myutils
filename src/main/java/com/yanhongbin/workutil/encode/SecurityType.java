@@ -1,7 +1,7 @@
 package com.yanhongbin.workutil.encode;
 
 
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Created with IDEA

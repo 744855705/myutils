@@ -18,9 +18,20 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @date : Created in 2020/5/29 10:55 上午
  */
 public class ScheduledExecutorProxy {
-    private static final ScheduledExecutorService scheduledExecutorService =
-        new ScheduledThreadPoolExecutor(4, new ScheduledThreadFactory());
+    /**
+     * cpu 核心数
+     */
+    private static final Integer availableProcessors = Runtime.getRuntime().availableProcessors();
 
+    /**
+     * 延迟任务线程池
+     */
+    private static final ScheduledExecutorService scheduledExecutorService =
+            new ScheduledThreadPoolExecutor(availableProcessors << 1, new ScheduledThreadFactory());
+
+    /**
+     * Logger
+     */
     private static final Logger log = LoggerFactory.getLogger(ScheduledExecutorProxy.class);
     public static ScheduledExecutorService getCacheScheduledExecutorService(){
         return scheduledExecutorService;
@@ -29,16 +40,16 @@ public class ScheduledExecutorProxy {
     static {
         // jvm关闭的时候关闭线程池，因为jvm关闭会销毁内存，所以可以直接使用 shutdownNow 方式关闭
         // jdk 1.8之后使用
-//        Runtime.getRuntime().addShutdownHook(new Thread(scheduledExecutorService::shutdownNow));
+        Runtime.getRuntime().addShutdownHook(new Thread(scheduledExecutorService::shutdownNow));
 
         // jdk 1.7之前使用
-        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-            @Override
-            public void run() {
-                log.info("ScheduledExecutorService 线程池 关闭");
-                scheduledExecutorService.shutdown();
-            }
-        }));
+//        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                log.info("ScheduledExecutorService 线程池 关闭");
+//                scheduledExecutorService.shutdown();
+//            }
+//        }));
     }
 
     /**
@@ -156,11 +167,11 @@ public class ScheduledExecutorProxy {
      */
     static class ScheduledThreadFactory implements ThreadFactory {
 
-        private final AtomicInteger integer = new AtomicInteger(0);
+        private final AtomicInteger num = new AtomicInteger(0);
 
         @Override
         public Thread newThread(Runnable r) {
-            return new Thread(Thread.currentThread().getThreadGroup(), r, "Scheduled-Thread" + integer.incrementAndGet());
+            return new Thread(Thread.currentThread().getThreadGroup(), r, "Scheduled-Thread" + num.incrementAndGet());
         }
     }
 

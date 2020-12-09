@@ -1,6 +1,7 @@
 package com.yanhongbin.workutil.localcache;
 
 
+import com.yanhongbin.workutil.localcache.node.Node;
 import com.yanhongbin.workutil.scheduled.ScheduledExecutorProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,7 @@ public class CacheUtil {
     private static final ReentrantLock LOCK = new ReentrantLock();
 
     /**
-     * 用来计算缓存过期的工具队列，线程不安全
+     * 用来计算缓存过期的工具队列，线程不安全，操作的时候需要上锁
      */
     @SuppressWarnings("rawtypes")
     private static final PriorityQueue<Node> EXPIRE_QUEUE = new PriorityQueue<Node>(2<<10);
