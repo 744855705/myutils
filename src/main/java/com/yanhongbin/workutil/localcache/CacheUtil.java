@@ -150,20 +150,6 @@ public class CacheUtil {
         }
     }
 
-//    /**
-//     * 删除过期的key，FIXME 过大的时候会缓慢，谨慎调用
-//     * @deprecated 使用 {@link CacheUtil#clearOverTimeNode()}
-//     */
-//    public static void clearAllOverTimeNode() {
-//        lock.lock();
-//        try {
-//            cache.forEach((key, node)->{
-//                node.checkAndRemoveOverTime();
-//            });
-//        }finally {
-//            lock.unlock();
-//        }
-//    }
 
     /**
      * 从缓存中删除过期的key

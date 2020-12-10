@@ -42,14 +42,6 @@ public class ScheduledExecutorProxy {
         // jdk 1.8之后使用
         Runtime.getRuntime().addShutdownHook(new Thread(scheduledExecutorService::shutdownNow));
 
-        // jdk 1.7之前使用
-//        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                log.info("ScheduledExecutorService 线程池 关闭");
-//                scheduledExecutorService.shutdown();
-//            }
-//        }));
     }
 
     /**

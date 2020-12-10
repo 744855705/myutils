@@ -97,13 +97,14 @@ public class CollectionUtils {
     }
 
     /**
-     * 创建只有一个元素的List
-     * @param t t
+     * 创建只有一个元素的List,用来替代{@link Collections#singletonList(Object)}，因为该方法返回的list不能进行元素增加操作
+     *
+     * @param t   t
      * @param <T> 泛型
      * @return List<T>
      */
     public static <T> List<T> createSingletonList(T t) {
-        return Collections.singletonList(t);
+        return new ArrayList<>(Collections.singletonList(t));
     }
 
     @SuppressWarnings("unchecked")
@@ -111,4 +112,13 @@ public class CollectionUtils {
         return collection.toArray((T[])Array.newInstance(clazz,collection.size()));
     }
 
+    /**
+     * 替代 {@link Collections#emptyList()}，因为该方法返回的list不能进行元素增加操作
+     *
+     * @param <T> 类型
+     * @return empty LinkedList
+     */
+    public static <T> List<T> emptyList() {
+        return new LinkedList<>();
+    }
 }
