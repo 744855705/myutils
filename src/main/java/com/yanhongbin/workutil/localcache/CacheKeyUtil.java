@@ -9,6 +9,16 @@ package com.yanhongbin.workutil.localcache;
  */
 public class CacheKeyUtil {
 
+    /**
+     * 拼接参数分隔符
+     */
+    private static final Character DELIMITER = '_';
+
+    /**
+     * 参数为null的时候拼接的值
+     */
+    private static final String NULL_VALUE = "NULL";
+
     private static final String WE_CHAT_CLIENT_ACCESS_TOKEN_CACHE_KEY = "WE_CHAT_CLIENT_ACCESS_TOKEN_CACHE_KEY";
     private static final String WE_CHAT_ACCESS_TOKEN_CACHE_KEY = "WE_CHAT_ACCESS_TOKEN_CACHE_KEY";
     private static final String WE_CHAT_JS_API_TICKET_CACHE_KEY = "WE_CHAT_JS_API_TICKET_CACHE_KEY";
@@ -18,9 +28,9 @@ public class CacheKeyUtil {
         StringBuilder builder = new StringBuilder(prefix);
         for (Object arg : args) {
             if (arg != null) {
-                builder.append('_').append(arg);
+                builder.append(DELIMITER).append(arg);
             }else {
-                builder.append('_').append("NULL");
+                builder.append(DELIMITER).append(NULL_VALUE);
             }
         }
         return builder.toString().intern();
