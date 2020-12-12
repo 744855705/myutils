@@ -71,6 +71,7 @@ public interface ICache {
      * @param <T> value 类型
      * @return T t
      */
+    @SuppressWarnings("unchecked")
     default <T> T delete(String key, Class<T> clazz){
         Object o = get(key);
         if (o == null) {
