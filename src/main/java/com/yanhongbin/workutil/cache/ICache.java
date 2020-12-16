@@ -37,12 +37,10 @@ public interface ICache {
      * @param expire 过期时间,单位秒
      * @param <T>    value 类型
      */
-    default <T> void put(String key, T value, long expire) {
-        put(key, value, expire, TimeUnit.SECONDS);
-    }
+    <T> void put(String key, T value, long expire);
 
     /**
-     * 放入缓存，声明过期时间
+     * 放入缓存，声明过期时间,{@link #put(String, Object, long)}
      *
      * @param key    key
      * @param value  value
@@ -50,7 +48,10 @@ public interface ICache {
      * @param unit   过期时间单位
      * @param <T>    value 类型
      */
-    <T> void put(String key, T value, long expire, TimeUnit unit);
+    default <T> void put(String key, T value, long expire, TimeUnit unit) {
+        // 默认实现，将时间转换成秒，调用 #put(String, Object, long) 方法
+        put(key, value, TimeUnit.SECONDS.convert(expire, unit));
+    };
 
     /**
      * 清除全部缓存
@@ -81,7 +82,7 @@ public interface ICache {
             delete(key);
             return (T) o;
         } else {
-            throw new ClassCastException(String.format("%s can not cast to %s", o.getClass().getName(), clazz.getName()));
+            throw new ClassCastException("Cannot cast " + o.getClass().getName() + " to " + clazz.getName());
         }
     }
 
