@@ -1,5 +1,6 @@
 package com.yanhongbin.workutil.scheduled;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,22 +18,20 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author ：yanhongbin
  * @date : Created in 2020/5/29 10:55 上午
  */
+@Slf4j
 public class ScheduledExecutorProxy {
     /**
      * cpu 核心数
      */
-    private static final Integer availableProcessors = Runtime.getRuntime().availableProcessors();
+    private static final Integer AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
 
     /**
      * 延迟任务线程池
      */
     private static final ScheduledExecutorService scheduledExecutorService =
-            new ScheduledThreadPoolExecutor(availableProcessors << 1, new ScheduledThreadFactory());
+            new ScheduledThreadPoolExecutor(AVAILABLE_PROCESSORS << 1, new ScheduledThreadFactory());
 
-    /**
-     * Logger
-     */
-    private static final Logger log = LoggerFactory.getLogger(ScheduledExecutorProxy.class);
+
     public static ScheduledExecutorService getCacheScheduledExecutorService(){
         return scheduledExecutorService;
     }
