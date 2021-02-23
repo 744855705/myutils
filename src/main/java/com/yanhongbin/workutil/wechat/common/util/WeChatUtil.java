@@ -2,6 +2,7 @@ package com.yanhongbin.workutil.wechat.common.util;
 
 import com.alibaba.fastjson.JSONObject;
 
+import com.yanhongbin.workutil.cache.ICache;
 import com.yanhongbin.workutil.cache.localcache.LocalCacheManager;
 import com.yanhongbin.workutil.encode.SecurityUtils;
 import com.yanhongbin.workutil.http.HttpFluentUtil;
@@ -12,6 +13,7 @@ import com.yanhongbin.workutil.wechat.common.WeChatAccessToken;
 import com.yanhongbin.workutil.wechat.common.WeChatJsApiTicket;
 import com.yanhongbin.workutil.wechat.common.WeChatOpenIdAndAccessToken;
 import com.yanhongbin.workutil.wechat.common.WeChatUserInfo;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -38,6 +40,13 @@ public class WeChatUtil {
     private static final String REFRESH_ACCESS_TOKEN_OPEN_ID_BY_CODE_URL = "https://api.weixin.qq.com/sns/oauth2/refresh_token?appid=%s&grant_type=refresh_token&refresh_token=%s";
     private static final String GET_WE_CHAT_USER_INFO_URL = "https://api.weixin.qq.com/sns/userinfo?access_token=%s&openid=%s&lang=zh_CN";
 
+    @Setter
+    private static ICache cache;
+
+    static {
+        // 默认使用本地缓存
+        cache = LocalCacheManager.getCacheManager();
+    }
 
     /**
      * 从微信获取 access_token
@@ -57,7 +66,7 @@ public class WeChatUtil {
      * @return access_token
      */
     static public String getAccessTokenInCache(String appId, String secret) {
-        return LocalCacheManager.getCacheManager().getAndRefresh(CacheKeyUtil.makeWeChatAccessTokenCacheKey(appId, secret), new IRefresh<String>() {
+        return cache.getAndRefresh(CacheKeyUtil.makeWeChatAccessTokenCacheKey(appId, secret), new IRefresh<String>() {
             private final WeChatAccessToken accessToken =  WeChatUtil.getAccessToken(appId, secret);
             @Override
             public String getContent() {
@@ -86,7 +95,7 @@ public class WeChatUtil {
      * @return String ticket
      */
     static public String getJsApiTicketInCache(String accessToken) {
-        return LocalCacheManager.getCacheManager().getAndRefresh(CacheKeyUtil.makeWeChatJsApiTicketCacheKey(accessToken), new IRefresh<String>() {
+        return cache.getAndRefresh(CacheKeyUtil.makeWeChatJsApiTicketCacheKey(accessToken), new IRefresh<String>() {
             private final WeChatJsApiTicket jsApiTicket = WeChatUtil.getJsApiTicket(accessToken);
             @Override
             public String getContent() {
@@ -132,7 +141,7 @@ public class WeChatUtil {
     }
 
     static public WeChatOpenIdAndAccessToken refreshAccessTokenOpenIdCache(String appId, String refreshToken) {
-        return LocalCacheManager.getCacheManager().getAndRefresh(CacheKeyUtil.makeWeChatClientAccessTokenCacheKey(appId, refreshToken), new IRefresh<WeChatOpenIdAndAccessToken>() {
+        return cache.getAndRefresh(CacheKeyUtil.makeWeChatClientAccessTokenCacheKey(appId, refreshToken), new IRefresh<WeChatOpenIdAndAccessToken>() {
             private final WeChatOpenIdAndAccessToken weChatOpenIdAndAccessToken = WeChatUtil.refreshAccessTokenOpenIdByCode(appId, refreshToken);
             @Override
             public WeChatOpenIdAndAccessToken getContent() {

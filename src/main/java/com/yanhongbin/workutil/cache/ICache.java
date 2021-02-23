@@ -131,4 +131,8 @@ public interface ICache {
         }
         return clazz.isAssignableFrom(o.getClass());
     }
+
+    static ICache getInstance(){
+        return null;
+    }
 }
