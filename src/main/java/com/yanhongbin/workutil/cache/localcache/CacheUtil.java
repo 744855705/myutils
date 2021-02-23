@@ -3,9 +3,9 @@ package com.yanhongbin.workutil.cache.localcache;
 
 import com.yanhongbin.workutil.cache.IRefresh;
 import com.yanhongbin.workutil.cache.localcache.node.Node;
+import com.yanhongbin.workutil.log.LogUtil;
 import com.yanhongbin.workutil.scheduled.ScheduledExecutorProxy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collection;
 import java.util.Map;
@@ -23,10 +23,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * @date : Created in 2020/4/21 9:51 上午
  */
 @SuppressWarnings("rawtypes")
+@Slf4j
 public class CacheUtil {
-
-    private static final Logger log = LoggerFactory.getLogger(CacheUtil.class);
-
 
     /**
      * 使用ConcurrentHashMap作为缓存，put 线程安全
@@ -143,7 +141,7 @@ public class CacheUtil {
     public static void clear() {
         LOCK.lock();
         try {
-            log.info("清空缓存");
+            LogUtil.info(log, "清空缓存");
             CACHE.clear();
             EXPIRE_QUEUE.clear();
         } finally {
@@ -189,7 +187,7 @@ public class CacheUtil {
         T t = get(key);
         // 对象类型处理
         if (t == null) {
-            log.info("未查到本地缓存，key:{}", key);
+            LogUtil.info(log, "未查到本地缓存，key:{}", key);
             synchronized (key.intern()) {
                 t = get(key);
                 if (t == null) {
@@ -216,7 +214,7 @@ public class CacheUtil {
 
     private static <T> T refreshString(String key, IRefresh<T> refresh, T t) {
         if (isEmptyOrBlank((String) t)) {
-            log.info("未查到本地缓存，key:{}", key);
+            LogUtil.info(log, "未查到本地缓存，key:{}", key);
             synchronized (key.intern()) {
                 t = get(key);
                 if (isEmptyOrBlank((String) t)) {
@@ -241,7 +239,7 @@ public class CacheUtil {
      */
     private static <T> T refreshMap(String key, IRefresh<T> refresh, T t) {
         if (((Map) t).isEmpty()) {
-            log.info("未查到本地缓存，key:{}", key);
+            LogUtil.info(log, "未查到本地缓存，key:{}", key);
             synchronized (key.intern()) {
                 t = get(key);
                 if (t == null || ((Map) t).isEmpty()) {
@@ -254,7 +252,7 @@ public class CacheUtil {
 
     private static <T> T refreshCollection(String key, IRefresh<T> refresh, T t) {
         if (((Collection) t).isEmpty()) {
-            log.info("未查到本地缓存，key:{}", key);
+            LogUtil.info(log, "未查到本地缓存，key:{}", key);
             synchronized (key.intern()) {
                 t = get(key);
                 if ( t ==null || ((Collection) t).isEmpty()) {
@@ -266,7 +264,7 @@ public class CacheUtil {
     }
 
     private static <T> T refreshContent(String key, IRefresh<T> refresh) {
-        log.info("刷新缓存,key:{}", key);
+        LogUtil.info(log, "刷新缓存,key:{}", key);
         T t = refresh.getContent();
         put(key, t, refresh.getExpire());
         return t;

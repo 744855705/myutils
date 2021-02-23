@@ -6,15 +6,14 @@ import com.yanhongbin.workutil.cache.localcache.LocalCacheManager;
 import com.yanhongbin.workutil.encode.SecurityUtils;
 import com.yanhongbin.workutil.http.HttpFluentUtil;
 import com.yanhongbin.workutil.cache.localcache.CacheKeyUtil;
-import com.yanhongbin.workutil.cache.localcache.CacheUtil;
 import com.yanhongbin.workutil.cache.IRefresh;
+import com.yanhongbin.workutil.log.LogUtil;
 import com.yanhongbin.workutil.wechat.common.WeChatAccessToken;
 import com.yanhongbin.workutil.wechat.common.WeChatJsApiTicket;
 import com.yanhongbin.workutil.wechat.common.WeChatOpenIdAndAccessToken;
 import com.yanhongbin.workutil.wechat.common.WeChatUserInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -28,9 +27,8 @@ import java.util.Set;
  * @author ：yanhongbin
  * @date : Created in 2020/8/28 11:27 上午
  */
+@Slf4j
 public class WeChatUtil {
-
-    private static final Logger log = LoggerFactory.getLogger(WeChatUtil.class);
 
     private static final String GET_ACCESS_TOKEN_URL = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s";
     private static final String GET_JS_API_TICKET_URL = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=%s&type=jsapi";
@@ -122,14 +120,14 @@ public class WeChatUtil {
     static public WeChatOpenIdAndAccessToken getAccessTokenOpenIdByCode(String appId, String secret, String code) {
         String formatUrl = String.format(GET_ACCESS_TOKEN_OPEN_ID_BY_CODE_URL, appId, secret, code);
         String get = HttpFluentUtil.doGet(formatUrl);
-        log.info("getAccessTokenOpenIdByCode.result:{}", get);
+        LogUtil.info(log, "getAccessTokenOpenIdByCode.result:{}", get);
         return new WeChatOpenIdAndAccessToken(JSONObject.parseObject(get));
     }
 
     static public WeChatOpenIdAndAccessToken refreshAccessTokenOpenIdByCode(String appId, String refreshToken) {
         String formatUrl = String.format(REFRESH_ACCESS_TOKEN_OPEN_ID_BY_CODE_URL, appId, refreshToken);
         String get = HttpFluentUtil.doGet(formatUrl);
-        log.info("getAccessTokenOpenIdByCode.result:{}", get);
+        LogUtil.info(log, "getAccessTokenOpenIdByCode.result:{}", get);
         return new WeChatOpenIdAndAccessToken(JSONObject.parseObject(get));
     }
 
@@ -162,7 +160,7 @@ public class WeChatUtil {
         Set<String> strings = paramMap.keySet();
         LinkedList<String> keys = new LinkedList<>(strings);
         Collections.sort(keys);
-        log.info("keys排序后:{}", keys);
+        LogUtil.info(log, "keys排序后:{}", keys);
         StringBuilder originSignStr = new StringBuilder();
         for (String key : keys) {
             Object value = paramMap.get(key);

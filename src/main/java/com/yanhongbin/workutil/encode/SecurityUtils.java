@@ -1,7 +1,7 @@
 package com.yanhongbin.workutil.encode;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.yanhongbin.workutil.log.LogUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -14,10 +14,8 @@ import java.security.NoSuchAlgorithmException;
  * @author ：yanhongbin
  * @date : Created in 2020/8/28 11:59 上午
  */
+@Slf4j
 public class SecurityUtils {
-
-    private static final Logger log = LoggerFactory.getLogger(SecurityUtils.class);
-
 
     public static String toHexString(byte[] md5Bytes) {
         StringBuilder hexValue = new StringBuilder();
@@ -45,8 +43,8 @@ public class SecurityUtils {
         if (SecurityType.NONE.equals(securityType)) {
             return "";
         }
-        log.info("使用加密方法：{}", securityType.getName());
-        log.info("要加密的字符串：{}", inStr);
+        LogUtil.info(log, "使用加密方法：{}", securityType.getName());
+        LogUtil.info(log, "要加密的字符串：{}", inStr);
         MessageDigest instance = null;
         try {
             instance = MessageDigest.getInstance(securityType.getName());

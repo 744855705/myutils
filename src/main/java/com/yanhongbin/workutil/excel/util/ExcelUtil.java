@@ -11,15 +11,16 @@ import com.yanhongbin.workutil.excel.exception.ExcelDictionaryMatchException;
 import com.yanhongbin.workutil.excel.exception.HeaderNotFindException;
 import com.yanhongbin.workutil.web.util.RequestUtil;
 import com.yanhongbin.workutil.web.util.ResponseUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-import javax.servlet.http.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
@@ -41,9 +42,8 @@ import java.util.*;
  * @version 1.0
  * @date :Created in 2019/12/4 13:53
  */
+@Slf4j
 public class ExcelUtil {
-
-    private static final Logger log = LoggerFactory.getLogger(ExcelUtil.class);
 
     /**
      * 一页最大行数 65535

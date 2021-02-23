@@ -1,14 +1,11 @@
-package com.yanhongbin.workutil;
+package com.yanhongbin.workutil.encode;
 
-
-import com.yanhongbin.workutil.encode.Base64Util;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.SecureRandom;
-import java.util.Base64;
 
 
 public class DESUtils {
@@ -65,7 +62,4 @@ public class DESUtils {
 		}
 	}
 
-
-	public static void main(String[] args) {
-	}
 }

@@ -3,9 +3,11 @@ package com.yanhongbin.workutil.wechat.miniapp;
 import com.alibaba.fastjson.JSONObject;
 
 import com.yanhongbin.workutil.http.HttpFluentUtil;
+import com.yanhongbin.workutil.log.LogUtil;
 import com.yanhongbin.workutil.wechat.common.util.WeChatUtil;
 import com.yanhongbin.workutil.wechat.miniapp.enumerate.Language;
 import com.yanhongbin.workutil.wechat.miniapp.enumerate.MiniProgramState;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,10 +19,8 @@ import org.slf4j.LoggerFactory;
  * @author YanHongBin
  * @date Created in 2020/7/04 10:40
  */
+@Slf4j
 public class WeChatMiniAppUtil {
-
-    private static final Logger log = LoggerFactory.getLogger(WeChatMiniAppUtil.class);
-
 
     /**
      * 从微信获取 access_token
@@ -69,9 +69,9 @@ public class WeChatMiniAppUtil {
         }
         json.put("miniprogram_state", state.getState());
         json.put("lang", language.getLanguage());
-        log.info("post body:{}", json);
+        LogUtil.info(log, "post body:{}", json);
         String post = HttpFluentUtil.post(url, json);
-        log.info("微信推送接口返回值:{}", post);
+        LogUtil.info(log, "微信推送接口返回值:{}", post);
     }
 
     /**
