@@ -1,4 +1,4 @@
-package com.yanhongbin.workutil.localcache;
+package com.yanhongbin.workutil.cache.localcache;
 
 
 import com.yanhongbin.workutil.scheduled.ScheduledCycleRunnableService;
@@ -16,7 +16,7 @@ public class ScheduledCycleRunnableServiceRemoveOverTimeNodeImpl implements Sche
 
     @Override
     public void run() {
-        CacheUtil.clearOverTimeNode();
+        LocalCacheManager.getCacheManager().clearOverTimeNode();
     }
 
     @Override

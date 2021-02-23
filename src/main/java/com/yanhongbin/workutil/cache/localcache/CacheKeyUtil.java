@@ -1,4 +1,4 @@
-package com.yanhongbin.workutil.localcache;
+package com.yanhongbin.workutil.cache.localcache;
 
 /**
  * Created with IDEA

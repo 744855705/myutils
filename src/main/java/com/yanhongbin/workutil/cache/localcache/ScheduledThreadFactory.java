@@ -1,4 +1,4 @@
-package com.yanhongbin.workutil.localcache;
+package com.yanhongbin.workutil.cache.localcache;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;

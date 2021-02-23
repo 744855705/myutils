@@ -1,4 +1,4 @@
-package com.yanhongbin.workutil.localcache;
+package com.yanhongbin.workutil.cache.localcache;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +18,6 @@ public class RemoveOverTimeNode implements Runnable {
     @Override
     public void run() {
         log.info("清除处理过期缓存");
-        CacheUtil.clearOverTimeNode();
+        LocalCacheManager.getCacheManager().clearOverTimeNode();
     }
 }

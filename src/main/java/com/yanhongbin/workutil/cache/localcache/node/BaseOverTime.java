@@ -1,6 +1,6 @@
-package com.yanhongbin.workutil.localcache.node;
+package com.yanhongbin.workutil.cache.localcache.node;
 
-import com.yanhongbin.workutil.localcache.CacheUtil;
+import com.yanhongbin.workutil.cache.localcache.CacheUtil;
 
 /**
  * Created with IDEA

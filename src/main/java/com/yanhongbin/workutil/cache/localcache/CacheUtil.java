@@ -1,7 +1,8 @@
-package com.yanhongbin.workutil.localcache;
+package com.yanhongbin.workutil.cache.localcache;
 
 
-import com.yanhongbin.workutil.localcache.node.Node;
+import com.yanhongbin.workutil.cache.IRefresh;
+import com.yanhongbin.workutil.cache.localcache.node.Node;
 import com.yanhongbin.workutil.scheduled.ScheduledExecutorProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -185,12 +186,12 @@ public class CacheUtil {
      * @return 缓存内容
      */
     public static <T> T getAndRefresh(String key,IRefresh<T> refresh){
-        T t = CacheUtil.get(key);
+        T t = get(key);
         // 对象类型处理
         if (t == null) {
             log.info("未查到本地缓存，key:{}", key);
             synchronized (key.intern()) {
-                t = CacheUtil.get(key);
+                t = get(key);
                 if (t == null) {
                     t = refreshContent(key, refresh);
                 }
@@ -217,7 +218,7 @@ public class CacheUtil {
         if (isEmptyOrBlank((String) t)) {
             log.info("未查到本地缓存，key:{}", key);
             synchronized (key.intern()) {
-                t = CacheUtil.get(key);
+                t = get(key);
                 if (isEmptyOrBlank((String) t)) {
                     t = refreshContent(key, refresh);
                 }
@@ -242,7 +243,7 @@ public class CacheUtil {
         if (((Map) t).isEmpty()) {
             log.info("未查到本地缓存，key:{}", key);
             synchronized (key.intern()) {
-                t = CacheUtil.get(key);
+                t = get(key);
                 if (t == null || ((Map) t).isEmpty()) {
                     t = refreshContent(key, refresh);
                 }
@@ -255,7 +256,7 @@ public class CacheUtil {
         if (((Collection) t).isEmpty()) {
             log.info("未查到本地缓存，key:{}", key);
             synchronized (key.intern()) {
-                t = CacheUtil.get(key);
+                t = get(key);
                 if ( t ==null || ((Collection) t).isEmpty()) {
                     t = refreshContent(key, refresh);
                 }
@@ -264,10 +265,10 @@ public class CacheUtil {
         return t;
     }
 
-    public static <T> T refreshContent(String key, IRefresh<T> refresh) {
+    private static <T> T refreshContent(String key, IRefresh<T> refresh) {
         log.info("刷新缓存,key:{}", key);
         T t = refresh.getContent();
-        CacheUtil.put(key, t, refresh.getExpire());
+        put(key, t, refresh.getExpire());
         return t;
     }
 }

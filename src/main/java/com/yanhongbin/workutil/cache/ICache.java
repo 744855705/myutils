@@ -105,6 +105,20 @@ public interface ICache {
     }
 
     /**
+     * 清除所有过期内容,默认不实现
+     */
+    default void clearOverTimeNode(){}
+
+    /**
+     * 先查询,当查询不到时,调用{@link IRefresh#getContent()}获取内容,放入缓存并返回
+     * @param key key
+     * @param refresh 获取内容方法,在缓存中不能获取到内容时调用
+     * @param <T> 缓存value 类型
+     * @return value
+     */
+    <T> T getAndRefresh(String key, IRefresh<T> refresh);
+
+    /**
      * 判断 {@code o.getClass()}是否是 {@param clazz}的子类
      *
      * @param o     o
