@@ -12,6 +12,11 @@ import java.util.concurrent.TimeUnit;
 public interface ICache {
 
     /**
+     * 声明不过期的变量时使用的过期时间占位参数
+     */
+    Long NOT_EXPIRE = -1L;
+
+    /**
      * 从缓存中获取数据
      *
      * @param key key
@@ -27,7 +32,9 @@ public interface ICache {
      * @param value value
      * @param <T>   value类型
      */
-    <T> void put(String key, T value);
+    default <T> void put(String key, T value){
+        put(key, value, NOT_EXPIRE);
+    }
 
     /**
      * 放入缓存，声明过期时间
@@ -51,7 +58,7 @@ public interface ICache {
     default <T> void put(String key, T value, long expire, TimeUnit unit) {
         // 默认实现，将时间转换成秒，调用 #put(String, Object, long) 方法
         put(key, value, TimeUnit.SECONDS.convert(expire, unit));
-    };
+    }
 
     /**
      * 清除全部缓存
@@ -69,6 +76,7 @@ public interface ICache {
      * 返回并删除某个key 对应的缓存，若不存在该缓存内容，则返回null
      *
      * @param key key
+     * @param clazz class
      * @param <T> value 类型
      * @return T t
      */

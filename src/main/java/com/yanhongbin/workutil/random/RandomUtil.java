@@ -1,6 +1,8 @@
 package com.yanhongbin.workutil.random;
 
+import com.alibaba.fastjson.JSONObject;
 import com.yanhongbin.workutil.collections.CollectionUtils;
+import lombok.ToString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,7 +10,8 @@ import java.util.*;
 
 /**
  * Created with IDEA
- * description : 随机数工具类，圆桌随机使用
+ * description : 随机工具类，
+ *               配合{@link IRandomProbability}支持圆桌随机
  *
  * @author ：yanhongbin
  * @date : Created in 2020/6/2 10:53 上午
@@ -40,21 +43,12 @@ public class RandomUtil {
     }
 
     /**
-     * 随机UUID
-     * @return
-     * @return uuid
-     */
-    public static String getRandomUUID(){
-        return UUID.randomUUID().toString().replaceAll("-", "");
-    }
-
-    /**
      * 圆桌随机，单个
      * @param probabilities 参与随机
      * @return markCode
      */
-    public static String getIRandomProbability(Collection<? extends IRandomProbability> probabilities) {
-        List<String> iRandomProbability = getIRandomProbability(probabilities, 1);
+    public static String getRandomProbability(Collection<? extends IRandomProbability> probabilities) {
+        List<String> iRandomProbability = getRandomProbability(probabilities, 1);
         if (CollectionUtils.isEmpty(iRandomProbability)) {
             return null;
         }
@@ -68,7 +62,7 @@ public class RandomUtil {
      * @param num           个数
      * @return markCode String
      */
-    public static List<String> getIRandomProbability(Collection<? extends IRandomProbability> probabilities, int num) {
+    public static List<String> getRandomProbability(Collection<? extends IRandomProbability> probabilities, int num) {
         log.info("随机结果个数：{}", num);
         if (CollectionUtils.isEmpty(probabilities)) {
             return Collections.emptyList();
@@ -128,6 +122,14 @@ public class RandomUtil {
         };
     }
 
+    /**
+     * 随机UUID
+     * @return uuid without '-'
+     */
+    public static String randomUUID(){
+        return UUID.randomUUID().toString().replaceAll("-", "");
+    }
+
 
     /**
      * 匹配使用内部类
@@ -156,11 +158,7 @@ public class RandomUtil {
 
         @Override
         public String toString() {
-            return "RandomProbability{" +
-                "pre=" + pre +
-                ", markCode='" + markCode + '\'' +
-                ", probability=" + probability +
-                '}';
+            return JSONObject.toJSONString(this);
         }
     }
 
